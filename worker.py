@@ -3,7 +3,6 @@ import cv2
 import go_vncdriver
 import tensorflow as tf
 import argparse
-import json
 import logging
 import os
 
@@ -62,25 +61,41 @@ def run(args, server):
     sv.stop()
     logger.info('reached %s steps. worker stopped.', global_step)
 
+def cluster_spec(num_workers, num_ps):
+    cluster = {}
+    port = 12222
+
+    all_ps = []
+    host = '127.0.0.1'
+    for _ in range(num_ps):
+        all_ps.append('{}:{}'.format(host, port))
+        port += 1
+    cluster['ps'] = all_ps
+
+    all_workers = []
+    for _ in range(num_workers):
+        all_workers.append('{}:{}'.format(host, port))
+        port += 1
+    cluster['worker'] = all_workers
+    return cluster
+
 def main(_):
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0, help='Set verbosity.')
     parser.add_argument('--task', default=0, type=int, help='Task index')
     parser.add_argument('--job-name', default="worker", help='worker or ps')
-    parser.add_argument('--cluster', required=True, help='JSON dump of the cluster spec to use')
+    parser.add_argument('--num-workers', default=1, type=int, help='Number of workers')
     parser.add_argument('--log-dir', default="/tmp/pong", help='Log directory path')
-    parser.add_argument('--remotes', help='What VNC remotes to use')
+    parser.add_argument('--env-id', default="VNCPongDeterministic-v3", help='Environment id')
     args = parser.parse_args()
-    spec = json.loads(args.cluster)
+    spec = cluster_spec(args.num_workers, 1)
     cluster = tf.train.ClusterSpec(spec).as_cluster_def()
 
     if args.job_name == "worker":
-        logger.info('Running with: cluster_spec=%s remotes=%s', spec, args.remotes)
         server = tf.train.Server(cluster, job_name="worker", task_index=args.task,
                                  config=tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=2))
         run(args, server)
     else:
-        logger.info('Cluster spec: %s', spec)
         server = tf.train.Server(cluster, job_name="ps", task_index=args.task,
                                  config=tf.ConfigProto(device_filters=["/job:ps"]))
 
