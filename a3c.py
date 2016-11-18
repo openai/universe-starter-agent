@@ -86,6 +86,7 @@ def env_runner(env, policy, num_local_steps):
     last_state = env.reset()
     last_features = policy.get_initial_features()
     length = 0
+    rewards = 0
 
     while True:
         terminal_end = False
@@ -98,6 +99,7 @@ def env_runner(env, policy, num_local_steps):
 
             rollout.add(last_state, action, reward, value_, terminal, last_features)
             length += 1
+            rewards += reward
 
             last_state = state
             last_features = features
@@ -107,7 +109,9 @@ def env_runner(env, policy, num_local_steps):
                 if length >= env.spec.timestep_limit or not env.metadata.get('semantics.autoreset'):
                     last_state = env.reset()
                 last_features = policy.get_initial_features()
+                print("Episode finished. Sum of rewards: %d. Length: %d" % (rewards, length))
                 length = 0
+                rewards = 0
                 break
 
         if not terminal_end:

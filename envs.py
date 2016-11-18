@@ -4,7 +4,7 @@ import numpy as np
 import gym
 import logging
 from universe import vectorized
-from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unvectorize
+from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unvectorize, Vectorize
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -16,6 +16,8 @@ def create_env(env_id, n=1, **kwargs):
         return create_flash_env(env_id, remotes, **kwargs)
     elif spec.tags.get('atari', False) and spec.tags.get('vnc', False):
         return create_vncatari_env(env_id, remotes, **kwargs)
+    else:
+        return create_atari_env(env_id)
 
 def create_flash_env(env_id, remotes, **_):
     raise NotImplementedError()
@@ -52,4 +54,11 @@ def create_vncatari_env(env_id, remotes, **_):
     logger.info('Connecting to remotes: %s', remotes)
     fps = env.metadata['video.frames_per_second']
     env.configure(remotes=remotes, start_timeout=15 * 60, fps=fps)
+    return env
+
+def create_atari_env(env_id):
+    env = gym.make(env_id)
+    env = Vectorize(env)
+    env = AtariRescale42x42(env)
+    env = Unvectorize(env)
     return env
