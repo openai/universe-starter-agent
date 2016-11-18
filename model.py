@@ -65,5 +65,7 @@ class LSTMPolicy(object):
         lstm_c, lstm_h = lstm_state
         x = tf.reshape(lstm_outputs, [-1, size])
         self.logits = linear(x, ac_space, "action", normalized_columns_initializer(0.01))
-        self.vf = linear(x, 1, "value", normalized_columns_initializer(1.0))
+        self.vf = tf.reshape(linear(x, 1, "value", normalized_columns_initializer(1.0)), [-1])
         self.state_out = [lstm_c[0, :], lstm_h[0, :]]
+
+        self.var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, tf.get_variable_scope().name)
