@@ -37,14 +37,12 @@ def create_tmux_commands(session, num_workers, env_id, logdir):
 
     return cmds
 
-
 def run():
     args = parser.parse_args()
 
     cmds = create_tmux_commands("a3c", args.num_workers, args.env_id, args.log_dir)
     print("\n".join(cmds))
     os.system("\n".join(cmds))
-
 
 if __name__ == "__main__":
     run()
