@@ -3,11 +3,13 @@ from gym.spaces.box import Box
 import numpy as np
 import gym
 import logging
+import universe
 from universe import vectorized
 from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unvectorize, Vectorize
 import time
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+universe.enable_logfile()
 
 def DiagnosticsInfo(env, *args, **kwargs):
     return vectorized.VectorizeFilter(env, DiagnosticsInfoI, *args, **kwargs)
