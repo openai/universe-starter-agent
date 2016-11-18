@@ -54,23 +54,20 @@ class PartialRollout(object):
         self.features.extend(other.features)
 
 class RunnerThread(threading.Thread):
-    def __init__(self, env, policy, num_local_steps, timeout=600.0):
+    def __init__(self, env, policy, num_local_steps):
         threading.Thread.__init__(self)
         self.queue = queue.Queue(5)
-        self.run_queue = queue.Queue(1)
         self.num_local_steps = num_local_steps
         self.env = env
-        self.last_state = None
         self.last_features = None
-        self.logger = None
         self.policy = policy
         self.daemon = True
         self.sess = None
-        self.started = False
-        self.timeout = timeout
+        self.summary_writer = None
 
-    def start_runner(self, sess):
+    def start_runner(self, sess, summary_writer):
         self.sess = sess
+        self.summary_writer = summary_writer
         self.start()
 
     def run(self):
@@ -78,11 +75,11 @@ class RunnerThread(threading.Thread):
             self._run()
 
     def _run(self):
-        rollout_provider = env_runner(self.env, self.policy, self.num_local_steps)
+        rollout_provider = env_runner(self.env, self.policy, self.num_local_steps, self.summary_writer)
         while True:
-            self.queue.put(next(rollout_provider), timeout=self.timeout)
+            self.queue.put(next(rollout_provider), timeout=600.0)
 
-def env_runner(env, policy, num_local_steps):
+def env_runner(env, policy, num_local_steps, summary_writer):
     last_state = env.reset()
     last_features = policy.get_initial_features()
     length = 0
@@ -103,6 +100,13 @@ def env_runner(env, policy, num_local_steps):
 
             last_state = state
             last_features = features
+
+            if info:
+                summary = tf.Summary()
+                for k, v in info.items():
+                    summary.value.add(tag=k, simple_value=float(v))
+                summary_writer.add_summary(summary, policy.global_step.eval())
+                summary_writer.flush()
 
             if terminal or length >= env.spec.timestep_limit:
                 terminal_end = True
@@ -127,44 +131,54 @@ class A3C(object):
             self.opt_step = tf.get_variable("opt_step", [], tf.int32, initializer=tf.zeros_initializer, trainable=False)
             with tf.variable_scope("global"):
                 self.network = LSTMPolicy(env.observation_space.shape, env.action_space.n)
-            self.global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.zeros_initializer,
-                                               trainable=False)
+                self.global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.zeros_initializer,
+                                                   trainable=False)
 
-        with tf.device(worker_device), tf.variable_scope("local"):
-            self.local_network = pi = LSTMPolicy(env.observation_space.shape, env.action_space.n)
+        with tf.device(worker_device):
+            with tf.variable_scope("local"):
+                self.local_network = pi = LSTMPolicy(env.observation_space.shape, env.action_space.n)
+                pi.global_step = self.global_step
 
-        self.ac = tf.placeholder(tf.float32, [None, env.action_space.n], name="ac")
-        self.adv = tf.placeholder(tf.float32, [None], name="adv")
-        self.r = tf.placeholder(tf.float32, [None], name="r")
+            self.ac = tf.placeholder(tf.float32, [None, env.action_space.n], name="ac")
+            self.adv = tf.placeholder(tf.float32, [None], name="adv")
+            self.r = tf.placeholder(tf.float32, [None], name="r")
 
-        log_prob_tf = tf.nn.log_softmax(pi.logits)
-        prob_tf = tf.nn.softmax(pi.logits)
+            log_prob_tf = tf.nn.log_softmax(pi.logits)
+            prob_tf = tf.nn.softmax(pi.logits)
 
-        pi_loss = - tf.reduce_sum(tf.reduce_sum(prob_tf * self.ac, [1]) * self.adv)
-        vf_loss = 0.5 * tf.reduce_sum(tf.square(pi.vf - self.r))
-        entropy = - tf.reduce_sum(prob_tf * log_prob_tf)
+            pi_loss = - tf.reduce_sum(tf.reduce_sum(prob_tf * self.ac, [1]) * self.adv)
+            vf_loss = 0.5 * tf.reduce_sum(tf.square(pi.vf - self.r))
+            entropy = - tf.reduce_sum(prob_tf * log_prob_tf)
 
-        bs = tf.to_float(tf.shape(pi.x)[0])
-        tf.scalar_summary("model/policy_loss", pi_loss / bs)
-        tf.scalar_summary("model/value_loss", vf_loss / bs)
-        tf.scalar_summary("model/entropy", entropy / bs)
-        self.loss = pi_loss + vf_loss - entropy * 0.01
-        self.runner = RunnerThread(env, pi, 20)
+            bs = tf.to_float(tf.shape(pi.x)[0])
+            self.loss = pi_loss + vf_loss - entropy * 0.01
+            self.runner = RunnerThread(env, pi, 20)
 
-        grads = tf.gradients(self.loss, pi.var_list)
-        self.summary_op = tf.merge_all_summaries()
-        grads, _ = tf.clip_by_global_norm(grads, 40.0)
+            grads = tf.gradients(self.loss, pi.var_list)
 
-        self.sync = tf.group(*[v1.assign(v2) for v1, v2 in zip(pi.var_list, self.network.var_list)])
+            tf.scalar_summary("model/policy_loss", pi_loss / bs)
+            tf.scalar_summary("model/value_loss", vf_loss / bs)
+            tf.scalar_summary("model/entropy", entropy / bs)
+            tf.image_summary("model/state", pi.x)
+            tf.scalar_summary("model/grad_global_norm", tf.global_norm(grads))
+            tf.scalar_summary("model/var_global_norm", tf.global_norm(pi.var_list))
 
-        grads_and_vars = list(zip(grads, self.network.var_list))
-        inc_step = self.global_step.assign_add(tf.shape(pi.x)[0])
+            self.summary_op = tf.merge_all_summaries()
+            grads, _ = tf.clip_by_global_norm(grads, 40.0)
 
-        opt = tf.train.AdamOptimizer(1e-4)
-        self.train_op = tf.group(opt.apply_gradients(grads_and_vars, self.opt_step), inc_step)
+            self.sync = tf.group(*[v1.assign(v2) for v1, v2 in zip(pi.var_list, self.network.var_list)])
 
-    def start(self, sess):
-        self.runner.start_runner(sess)
+            grads_and_vars = list(zip(grads, self.network.var_list))
+            inc_step = self.global_step.assign_add(tf.shape(pi.x)[0])
+
+            opt = tf.train.AdamOptimizer(1e-4)
+            self.train_op = tf.group(opt.apply_gradients(grads_and_vars, self.opt_step), inc_step)
+            self.summary_writer = None
+            self.local_steps = 0
+
+    def start(self, sess, summary_writer):
+        self.runner.start_runner(sess, summary_writer)
+        self.summary_writer = summary_writer
 
     def pull_batch_from_queue(self):
         rollout = self.runner.queue.get(timeout=600.0)
@@ -179,14 +193,13 @@ class A3C(object):
         sess.run(self.sync)  # copy weights from shared to local
         rollout = self.pull_batch_from_queue()
         batch = process_rollout(rollout, gamma=0.99, lambda_=1.0)
-        global_step = sess.run(self.global_step)
 
-        should_compute_summary = self.task == 0 and global_step % 101 == 0
+        should_compute_summary = self.task == 0 and self.local_steps % 11 == 0
 
         if should_compute_summary:
-            fetches = [self.summary_op, self.train_op]
+            fetches = [self.summary_op, self.train_op, self.global_step]
         else:
-            fetches = [self.train_op]
+            fetches = [self.train_op, self.global_step]
 
         feed_dict = {
             self.local_network.x: batch.si,
@@ -200,6 +213,6 @@ class A3C(object):
         fetched = sess.run(fetches, feed_dict=feed_dict)
 
         if should_compute_summary:
-            pass
-            # TODO(rafal): add tensorboard
-            # self.logger.log(global_step, tf.Summary.FromString(fetched[0]))
+            self.summary_writer.add_summary(tf.Summary.FromString(fetched[0]), fetched[-1])
+            self.summary_writer.flush()
+        self.local_steps += 1

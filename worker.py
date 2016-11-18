@@ -9,6 +9,7 @@ from a3c import A3C
 from envs import create_env
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Disables write_meta_graph argument, which freezes entire process and is mostly useless.
 class FastSaver(tf.train.Saver):
@@ -43,8 +44,7 @@ def run(args, server):
                              init_fn=init_fn,
                              summary_writer=summary_writer,
                              ready_op=tf.report_uninitialized_variables(variables_to_save),
-                             # TODO(rafal): Fix!
-                             # global_step=trainer.global_network.global_step,
+                             global_step=trainer.global_step,
                              save_model_secs=30,
                              save_summaries_secs=30)
 
@@ -54,8 +54,9 @@ def run(args, server):
         "Starting session. If this hangs, we're mostly likely waiting to connect to the parameter server. " +
         "One common cause is that the parameter server DNS name isn't resolving yet, or is misspecified.")
     with sv.managed_session(server.target, config=config) as sess, sess.as_default():
-        trainer.start(sess)
+        trainer.start(sess, summary_writer)
         global_step = sess.run(trainer.global_step)
+        logger.info("Starting training at step=%d", global_step)
         while not sv.should_stop() and (not num_global_steps or global_step < num_global_steps):
             trainer.process(sess)
             global_step = sess.run(trainer.global_step)
