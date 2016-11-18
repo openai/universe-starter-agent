@@ -5,6 +5,8 @@ import tensorflow as tf
 import argparse
 import logging
 import os
+from a3c import A3C
+from envs import create_env
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,8 @@ class FastSaver(tf.train.Saver):
                                     meta_graph_suffix, False)
 
 def run(args, server):
-    # TODO(rafal): Create model and the trainer here!
+    env = create_env(args.env_id, n=1)
+    trainer = A3C(env, args.task)
 
     # Variable names that start with "local" are not saved in checkpoints.
     variables_to_save = [v for v in tf.all_variables() if not v.name.startswith("local")]
@@ -51,11 +54,11 @@ def run(args, server):
         "Starting session. If this hangs, we're mostly likely waiting to connect to the parameter server. " +
         "One common cause is that the parameter server DNS name isn't resolving yet, or is misspecified.")
     with sv.managed_session(server.target, config=config) as sess, sess.as_default():
-        trainer.start(sv, summary_writer, sess)
-        global_step = sess.run(network.global_step)
+        trainer.start(sess)
+        global_step = sess.run(trainer.global_step)
         while not sv.should_stop() and (not num_global_steps or global_step < num_global_steps):
             trainer.process(sess)
-            global_step = sess.run(network.global_step)
+            global_step = sess.run(trainer.global_step)
 
     # Ask for all the services to stop.
     sv.stop()

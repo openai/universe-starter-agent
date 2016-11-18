@@ -18,21 +18,12 @@ def process_rollout(rollout, gamma, lambda_=1.0):
     rewards_plus_v = np.asarray(rollout.rewards + [rollout.r])
     batch_r = discount(rewards_plus_v, gamma)[:-1]
     delta_t = rewards + gamma * vpred_t[1:] - vpred_t[:-1]
-    batch_td = discount(delta_t, gamma * lambda_)
+    batch_adv = discount(delta_t, gamma * lambda_)
 
-    features = {}
-    keys = rollout.features[0].keys()
+    features = rollout.features[0]
+    return Batch(batch_si, batch_a, batch_adv, batch_r, rollout.terminal, features)
 
-    for key in keys:
-        feature_values = []
-        for i in range(len(rollout.features)):
-            assert key in rollout.features[i]
-            feature_values.append(rollout.features[i][key])
-        features[key] = feature_values
-
-    return Batch(batch_si, batch_a, batch_td, batch_r, rollout.terminal, features)
-
-Batch = namedtuple("Batch", ["si", "a", "td", "r", "terminal", "features"])
+Batch = namedtuple("Batch", ["si", "a", "adv", "r", "terminal", "features"])
 
 class PartialRollout(object):
     def __init__(self):
@@ -93,7 +84,7 @@ class RunnerThread(threading.Thread):
 
 def env_runner(env, policy, num_local_steps):
     last_state = env.reset()
-    last_features = policy.reset()
+    last_features = policy.get_initial_features()
     length = 0
 
     while True:
@@ -101,10 +92,9 @@ def env_runner(env, policy, num_local_steps):
         rollout = PartialRollout()
 
         for _ in range(num_local_steps):
-            action, value_, features = policy.sample_policy_and_value(last_state, last_features)
-            action_for_env = policy.postprocess_action(action)
+            action, value_, *features = policy.act(last_state, *last_features)
             # argmax to convert from one-hot
-            state, reward, terminal, info = env.step(action_for_env.argmax())
+            state, reward, terminal, info = env.step(action.argmax())
 
             rollout.add(last_state, action, reward, value_, terminal, last_features)
             length += 1
@@ -116,12 +106,12 @@ def env_runner(env, policy, num_local_steps):
                 terminal_end = True
                 if length >= env.spec.timestep_limit or not env.metadata.get('semantics.autoreset'):
                     last_state = env.reset()
-                last_features = policy.reset()
+                last_features = policy.get_initial_features()
                 length = 0
                 break
 
         if not terminal_end:
-            rollout.r, _ = policy.run_value(last_state, last_features)
+            rollout.r = policy.value(last_state, *last_features)
         yield rollout
 
 class A3C(object):
@@ -136,7 +126,7 @@ class A3C(object):
             self.global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.zeros_initializer,
                                                trainable=False)
 
-        with tf.device(worker_device):
+        with tf.device(worker_device), tf.variable_scope("local"):
             self.local_network = pi = LSTMPolicy(env.observation_space.shape, env.action_space.n)
 
         self.ac = tf.placeholder(tf.float32, [None, env.action_space.n], name="ac")
@@ -169,6 +159,9 @@ class A3C(object):
         opt = tf.train.AdamOptimizer(1e-4)
         self.train_op = tf.group(opt.apply_gradients(grads_and_vars, self.opt_step), inc_step)
 
+    def start(self, sess):
+        self.runner.start_runner(sess)
+
     def pull_batch_from_queue(self):
         rollout = self.runner.queue.get(timeout=600.0)
         while not rollout.terminal:
@@ -194,8 +187,10 @@ class A3C(object):
         feed_dict = {
             self.local_network.x: batch.si,
             self.ac: batch.a,
-            self.adv: batch.td,
+            self.adv: batch.adv,
             self.r: batch.r,
+            self.local_network.state_in[0]: batch.features[0],
+            self.local_network.state_in[1]: batch.features[1],
         }
 
         fetched = sess.run(fetches, feed_dict=feed_dict)

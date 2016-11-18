@@ -23,9 +23,10 @@ def create_flash_env(env_id, remotes, **_):
 def _process_frame42(frame):
     frame = frame[:210, :160]
     frame = cv2.resize(frame, (84, 110))
-    frame = np.reshape(frame, [210, 160, 3]).astype(np.float32).mean(2)
+    frame = frame.mean(2)
     frame = frame[18:102, :]
     frame = cv2.resize(frame, (42, 42))
+    frame = frame.astype(np.float32)
     frame *= (1.0 / 255.0)
     frame = np.reshape(frame, [42, 42, 1])
     return frame
