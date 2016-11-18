@@ -128,7 +128,6 @@ class A3C(object):
         self.task = task
         worker_device = "/job:worker/task:{}/cpu:0".format(task)
         with tf.device(tf.train.replica_device_setter(1, worker_device=worker_device)):
-            self.opt_step = tf.get_variable("opt_step", [], tf.int32, initializer=tf.zeros_initializer, trainable=False)
             with tf.variable_scope("global"):
                 self.network = LSTMPolicy(env.observation_space.shape, env.action_space.n)
                 self.global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.zeros_initializer,
@@ -151,7 +150,7 @@ class A3C(object):
             entropy = - tf.reduce_sum(prob_tf * log_prob_tf)
 
             bs = tf.to_float(tf.shape(pi.x)[0])
-            self.loss = pi_loss + vf_loss - entropy * 0.01
+            self.loss = pi_loss + 0.5 * vf_loss - entropy * 0.01
             self.runner = RunnerThread(env, pi, 20)
 
             grads = tf.gradients(self.loss, pi.var_list)
@@ -172,7 +171,7 @@ class A3C(object):
             inc_step = self.global_step.assign_add(tf.shape(pi.x)[0])
 
             opt = tf.train.AdamOptimizer(1e-4)
-            self.train_op = tf.group(opt.apply_gradients(grads_and_vars, self.opt_step), inc_step)
+            self.train_op = tf.group(opt.apply_gradients(grads_and_vars), inc_step)
             self.summary_writer = None
             self.local_steps = 0
 
