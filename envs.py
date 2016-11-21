@@ -134,6 +134,7 @@ def create_vncatari_env(env_id, remotes, **_):
     assert env.metadata['runtime.vectorized']
     env = BlockingReset(env)
     env = DiscreteToVNCAction(env)
+    env = Vision(env)
     env = AtariRescale42x42(env)
     env = EpisodeID(env)
     env = DiagnosticsInfo(env)
