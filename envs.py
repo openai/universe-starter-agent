@@ -5,7 +5,7 @@ import gym
 import logging
 import universe
 from universe import vectorized
-from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unvectorize, Vectorize
+from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unvectorize, Vectorize, Vision
 import time
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
