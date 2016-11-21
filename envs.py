@@ -113,11 +113,9 @@ def create_flash_env(env_id, remotes, **_):
     raise NotImplementedError()
 
 def _process_frame42(frame):
-    frame = frame[:210, :160]
-    frame = cv2.resize(frame, (84, 110))
-    frame = frame.mean(2)
-    frame = frame[18:102, :]
+    frame = frame[34:34+160, :160]
     frame = cv2.resize(frame, (42, 42))
+    frame = frame.mean(2)
     frame = frame.astype(np.float32)
     frame *= (1.0 / 255.0)
     frame = np.reshape(frame, [42, 42, 1])
