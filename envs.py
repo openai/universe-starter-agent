@@ -9,7 +9,7 @@ from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unv
 import time
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-universe.enable_logfile()
+universe.configure_logging()
 
 def DiagnosticsInfo(env, *args, **kwargs):
     return vectorized.VectorizeFilter(env, DiagnosticsInfoI, *args, **kwargs)
