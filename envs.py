@@ -98,18 +98,18 @@ class DiagnosticsInfoI(vectorized.Filter):
 
         return observation, reward, done, to_log
 
-def create_env(env_id, n=1, **kwargs):
+def create_env(env_id, client_id, n=1, **kwargs):
     spec = gym.spec(env_id)
     remotes = "http://allocator.sci.openai-tech.com?n={}".format(n)
 
     if spec.tags.get('flashgames', False):
-        return create_flash_env(env_id, remotes, **kwargs)
+        return create_flash_env(env_id, client_id, remotes, **kwargs)
     elif spec.tags.get('atari', False) and spec.tags.get('vnc', False):
-        return create_vncatari_env(env_id, remotes, **kwargs)
+        return create_vncatari_env(env_id, client_id, remotes, **kwargs)
     else:
         return create_atari_env(env_id)
 
-def create_flash_env(env_id, remotes, **_):
+def create_flash_env(env_id, client_id, remotes, **_):
     raise NotImplementedError()
 
 def _process_frame42(frame):
@@ -129,7 +129,7 @@ class AtariRescale42x42(vectorized.ObservationWrapper):
     def _observation(self, observation_n):
         return [_process_frame42(observation) for observation in observation_n]
 
-def create_vncatari_env(env_id, remotes, **_):
+def create_vncatari_env(env_id, client_id, remotes, **_):
     env = gym.make(env_id)
     assert env.metadata['runtime.vectorized']
     env = BlockingReset(env)
@@ -142,7 +142,7 @@ def create_vncatari_env(env_id, remotes, **_):
 
     logger.info('Connecting to remotes: %s', remotes)
     fps = env.metadata['video.frames_per_second']
-    env.configure(remotes=remotes, start_timeout=15 * 60, fps=fps)
+    env.configure(remotes=remotes, start_timeout=15 * 60, fps=fps, client_id=client_id)
     return env
 
 def create_atari_env(env_id):
