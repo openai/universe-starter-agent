@@ -32,8 +32,9 @@ To see a window number 0, type: `ctrl-b 0`. Look up tmux documentation for more 
 
 To see various monitoring metrics of the agent, type: `http://localhost:22012/` in chrome, which will open TensorBoard.
 
-Using 16 workers, the agent should be able to solve Pong within 30 minutes on `m4.10xlarge` instance.
-![pong](https://github.com/openai/universe-starter-agent/raw/master/tb_pong.png "Pong")
+_Using 16 workers, the agent should be able to solve Pong within 30 minutes on `m4.10xlarge` instance_
+
+![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/tb_pong.png "Pong")
 
 For best performance, it is recommended for the number of workers to not exceed available number of CPU cores.
 
@@ -41,17 +42,22 @@ You can stop the experiment with `tmux kill-session` command.
 
 ## Playing games over remote desktop
 
-### Atari
-
-`python train.py --num-workers 2 --env-id gym-core.PongDeterministic-v3 --log-dir /tmp/vncpong`
-
-### Playing flash games
-
-`python train.py --num-workers 2 --env-id flashgames.DuskDrive-v0 --log-dir /tmp/duskdrive`
-
 The main difference to the previous experiment is that we are now going to play the game through VNC protocol.
 Environments are hosted on EC2 cloud but with the help of various wrappers (take a look at `envs.py` file)
 the experience should be similar to the agent as if it was played locally. The problem itself is more complicated
 because observations and actions are delayed due to network latencies.
 
 You can also peek what the agent is doing with a VNCViewer.
+
+### Atari
+
+`python train.py --num-workers 2 --env-id gym-core.PongDeterministic-v3 --log-dir /tmp/vncpong`
+
+_Peeking into the agent's environment with TurboVNC_
+
+![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/vnc_pong.png "Pong over VNC")
+
+### Playing flash games
+
+`python train.py --num-workers 2 --env-id flashgames.DuskDrive-v0 --log-dir /tmp/duskdrive`
+
