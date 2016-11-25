@@ -39,7 +39,7 @@ def create_flash_env(env_id, client_id, remotes, **_):
     env = CropScreen(env, height, width, 84, 18)
     env = FlashRescale(env)
 
-    keys = ['left', 'right', 'up', 'down', 'n']
+    keys = ['left', 'right', 'up', 'down', 'x']
     env = DiscreteToFixedKeysVNCActions(env, keys)
     env = EpisodeID(env)
     env = DiagnosticsInfo(env)

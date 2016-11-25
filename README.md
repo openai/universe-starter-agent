@@ -61,3 +61,5 @@ _Peeking into the agent's environment with TurboVNC_
 
 `python train.py --num-workers 2 --env-id flashgames.DuskDrive-v0 --log-dir /tmp/duskdrive`
 
+_What agent sees when playing Dusk Drive_
+![dusk](https://github.com/openai/universe-starter-agent/raw/master/imgs/dusk_drive.png "Dusk Drive")
