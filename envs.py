@@ -6,7 +6,7 @@ from gym import spaces
 import logging
 import universe
 from universe import vectorized
-from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unvectorize, Vectorize, Vision
+from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unvectorize, Vectorize, Vision, Logger
 from universe import spaces as vnc_spaces
 from universe.spaces.vnc_event import keycode
 import time
@@ -30,19 +30,21 @@ def create_env(env_id, client_id, n=1, **kwargs):
 def create_flash_env(env_id, client_id, remotes, **_):
     env = gym.make(env_id)
     env = Vision(env)
+    env = Logger(env)
     env = BlockingReset(env)
 
     reg = universe.runtime_spec('flashgames').server_registry
     height = reg[env_id]["height"]
     width = reg[env_id]["width"]
     env = CropScreen(env, height, width, 84, 18)
+    env = FlashRescale(env)
 
     keys = ['left', 'right', 'up', 'down', 'n']
     env = DiscreteToFixedKeysVNCActions(env, keys)
     env = EpisodeID(env)
     env = DiagnosticsInfo(env)
     env = Unvectorize(env)
-    env.configure(fps=10.0, remotes=remotes, start_timeout=15 * 60, client_id=client_id,
+    env.configure(fps=5.0, remotes=remotes, start_timeout=15 * 60, client_id=client_id,
                   vnc_driver='go', vnc_kwargs={
                     'encoding': 'tight', 'compress_level': 0,
                     'fine_quality_level': 50, 'subsample_level': 3})
@@ -51,6 +53,7 @@ def create_flash_env(env_id, client_id, remotes, **_):
 def create_vncatari_env(env_id, client_id, remotes, **_):
     env = gym.make(env_id)
     env = Vision(env)
+    env = Logger(env)
     env = BlockingReset(env)
     env = DiscreteToVNCAction(env)
     env = AtariRescale42x42(env)
