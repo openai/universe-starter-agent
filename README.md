@@ -11,6 +11,8 @@ It contains a basic implementation of A3C algorithm, adapted for real-time envir
 * tmux (the start script opens up a tmux session with multiple windows)
 * gym
 * universe
+* opencv-python
+* scipy
 
 # Getting Started
 
