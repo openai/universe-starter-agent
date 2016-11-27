@@ -1,8 +1,9 @@
+from __future__ import print_function
 from collections import namedtuple
 import numpy as np
 import tensorflow as tf
 from model import LSTMPolicy
-import queue
+import six.moves.queue as queue
 import scipy.signal
 import threading
 
@@ -90,7 +91,8 @@ def env_runner(env, policy, num_local_steps, summary_writer):
         rollout = PartialRollout()
 
         for _ in range(num_local_steps):
-            action, value_, *features = policy.act(last_state, *last_features)
+            fetched = policy.act(last_state, *last_features)
+            action, value_, features = fetched[0], fetched[1], fetched[2:]
             # argmax to convert from one-hot
             state, reward, terminal, info = env.step(action.argmax())
 

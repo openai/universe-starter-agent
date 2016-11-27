@@ -6,7 +6,8 @@ It contains a basic implementation of A3C algorithm, adapted for real-time envir
 # Dependencies
 
 * Anaconda
-* Python 3.5
+* Python 2.7 or 3.5
+* six (for py2/3 compatibility)
 * TensorFlow 0.11
 * tmux (the start script opens up a tmux session with multiple windows)
 * gym
