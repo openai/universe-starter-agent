@@ -6,7 +6,7 @@ from gym import spaces
 import logging
 import universe
 from universe import vectorized
-from universe.wrappers import BlockingReset, DiscreteToVNCAction, EpisodeID, Unvectorize, Vectorize, Vision, Logger
+from universe.wrappers import BlockingReset, GymCoreToVNC, EpisodeID, Unvectorize, Vectorize, Vision, Logger
 from universe import spaces as vnc_spaces
 from universe.spaces.vnc_event import keycode
 import time
@@ -55,7 +55,7 @@ def create_vncatari_env(env_id, client_id, remotes, **_):
     env = Vision(env)
     env = Logger(env)
     env = BlockingReset(env)
-    env = DiscreteToVNCAction(env)
+    env = GymCoreToVNC(env)
     env = AtariRescale42x42(env)
     env = EpisodeID(env)
     env = DiagnosticsInfo(env)
