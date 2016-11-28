@@ -5,7 +5,6 @@ It contains a basic implementation of A3C algorithm, adapted for real-time envir
 
 # Dependencies
 
-* Anaconda
 * Python 2.7 or 3.5
 * six (for py2/3 compatibility)
 * TensorFlow 0.11
@@ -13,6 +12,7 @@ It contains a basic implementation of A3C algorithm, adapted for real-time envir
 * gym
 * universe
 * opencv-python
+* numpy
 * scipy
 
 # Getting Started
