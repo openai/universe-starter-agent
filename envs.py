@@ -163,6 +163,10 @@ class DiagnosticsInfoI(vectorized.Filter):
 
 def _process_frame42(frame):
     frame = frame[34:34+160, :160]
+    # Resize by half, then down to 42x42 (essentially mipmapping). If
+    # we resize directly we lose pixels that, when mapped to 42x42,
+    # aren't close enough to the pixel boundary.
+    frame = cv2.resize(frame, (80, 80))
     frame = cv2.resize(frame, (42, 42))
     frame = frame.mean(2)
     frame = frame.astype(np.float32)
