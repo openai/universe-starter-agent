@@ -22,7 +22,7 @@ It contains a basic implementation of the A3C algorithm, adapted for real-time e
 `python train.py --num-workers 2 --env-id PongDeterministic-v3 --log-dir /tmp/pong`
 
 The command above will train an agent on Atari Pong using ALE simulator.
-It will se two workers that will be learning in parallel (`--num-workers` flag) and will output intermediate results into given directory.
+It will see two workers that will be learning in parallel (`--num-workers` flag) and will output intermediate results into given directory.
 
 The code will launch the following processes:
 * worker-0 - the first process that learns to solve the game
