@@ -7,10 +7,14 @@ import six.moves.queue as queue
 import scipy.signal
 import threading
 
+
 def discount(x, gamma):
     return scipy.signal.lfilter([1], [1, -gamma], x[::-1], axis=0)[::-1]
 
 def process_rollout(rollout, gamma, lambda_=1.0):
+    """
+given a rollout, compute its returns and the advantage
+"""
     batch_si = np.asarray(rollout.states)
     batch_a = np.asarray(rollout.actions)
     rewards = np.asarray(rollout.rewards)
@@ -19,6 +23,8 @@ def process_rollout(rollout, gamma, lambda_=1.0):
     rewards_plus_v = np.asarray(rollout.rewards + [rollout.r])
     batch_r = discount(rewards_plus_v, gamma)[:-1]
     delta_t = rewards + gamma * vpred_t[1:] - vpred_t[:-1]
+    # this formula for the advantage comes "Generalized Advantage Estimation":
+    # https://arxiv.org/abs/1506.02438
     batch_adv = discount(delta_t, gamma * lambda_)
 
     features = rollout.features[0]
@@ -27,6 +33,10 @@ def process_rollout(rollout, gamma, lambda_=1.0):
 Batch = namedtuple("Batch", ["si", "a", "adv", "r", "terminal", "features"])
 
 class PartialRollout(object):
+    """
+a piece of a complete rollout.  We run our agent, and and process its experience
+once it has processed enough steps.
+"""
     def __init__(self):
         self.states = []
         self.actions = []
@@ -55,6 +65,11 @@ class PartialRollout(object):
         self.features.extend(other.features)
 
 class RunnerThread(threading.Thread):
+    """
+One of the key distinctions between a normal environment and a universe environment
+is that a universe environment is _real time_.  This means that there should be a thread
+that would constantly interact with the environment and tell it what to do.  This thread is here.
+"""
     def __init__(self, env, policy, num_local_steps):
         threading.Thread.__init__(self)
         self.queue = queue.Queue(5)
@@ -78,9 +93,25 @@ class RunnerThread(threading.Thread):
     def _run(self):
         rollout_provider = env_runner(self.env, self.policy, self.num_local_steps, self.summary_writer)
         while True:
+            # the timeout variable exists becuase apparently, if one worker dies, the other workers
+            # won't die with it, unless the timeout is set to some large number.  This is an empirical
+            # observation.
+
+            try:
+                self.queue.get_nowait()
+            except queue.Empty:
+                pass  
             self.queue.put(next(rollout_provider), timeout=600.0)
 
+            # also note that we pop the most recent rollout from the queue.
+            
+
 def env_runner(env, policy, num_local_steps, summary_writer):
+    """
+The logic of the thread runner.  In brief, it constantly keeps on running
+the policy, and as long as the rollout exceeds a certain length, the therad 
+runner appends the policy to the queue.
+"""
     last_state = env.reset()
     last_features = policy.get_initial_features()
     length = 0
@@ -96,6 +127,7 @@ def env_runner(env, policy, num_local_steps, summary_writer):
             # argmax to convert from one-hot
             state, reward, terminal, info = env.step(action.argmax())
 
+            # collect the experience
             rollout.add(last_state, action, reward, value_, terminal, last_features)
             length += 1
             rewards += reward
@@ -110,6 +142,7 @@ def env_runner(env, policy, num_local_steps, summary_writer):
                 summary_writer.add_summary(summary, policy.global_step.eval())
                 summary_writer.flush()
 
+
             if terminal or length >= env.spec.timestep_limit:
                 terminal_end = True
                 if length >= env.spec.timestep_limit or not env.metadata.get('semantics.autoreset'):
@@ -122,10 +155,19 @@ def env_runner(env, policy, num_local_steps, summary_writer):
 
         if not terminal_end:
             rollout.r = policy.value(last_state, *last_features)
+
+        # once we have enough experience, yield it, and have the TheradRunner place it on a queue
         yield rollout
 
 class A3C(object):
     def __init__(self, env, task):
+        """
+An implementation of the A3C algorithm that is reasonably well-tuned for the VNC environments.
+Below, we will have a modest amount of complexity due to the way TensorFlow handles data parallelism.
+But overall, we'll define the model, specify its inputs, and describe how the policy graidents step
+should be computed.
+"""
+
         self.env = env
         self.task = task
         worker_device = "/job:worker/task:{}/cpu:0".format(task)
@@ -147,13 +189,26 @@ class A3C(object):
             log_prob_tf = tf.nn.log_softmax(pi.logits)
             prob_tf = tf.nn.softmax(pi.logits)
 
+            # the "policy gradients" loss:  its derivative is precisely the policy gradient
+            # notice that self.ac is a placeholder that is provided externally.
+            # ac will contain the advantages, as calculated in process_rollout
             pi_loss = - tf.reduce_sum(tf.reduce_sum(log_prob_tf * self.ac, [1]) * self.adv)
+
+            # loss of value function
             vf_loss = 0.5 * tf.reduce_sum(tf.square(pi.vf - self.r))
             entropy = - tf.reduce_sum(prob_tf * log_prob_tf)
 
             bs = tf.to_float(tf.shape(pi.x)[0])
             self.loss = pi_loss + 0.5 * vf_loss - entropy * 0.01
+
+            # 20 represents the number of "local steps":  the number of timesteps
+            # we run the policy before we update the parameters.
+            # The larger local steps is, the lower is the variance in our policy gradients estimate
+            # on the one hand;  but on the other hand, we get less frequent parameter updates, which
+            # slows down learning.  In this code, we found that making local steps be much
+            # smaller than 20 makes the algorithm more difficult to tune and to get to work.
             self.runner = RunnerThread(env, pi, 20)
+
 
             grads = tf.gradients(self.loss, pi.var_list)
 
@@ -167,11 +222,13 @@ class A3C(object):
             self.summary_op = tf.merge_all_summaries()
             grads, _ = tf.clip_by_global_norm(grads, 40.0)
 
+            # copy weights from the parameter server to the local model
             self.sync = tf.group(*[v1.assign(v2) for v1, v2 in zip(pi.var_list, self.network.var_list)])
 
             grads_and_vars = list(zip(grads, self.network.var_list))
             inc_step = self.global_step.assign_add(tf.shape(pi.x)[0])
 
+            # each worker has a different set of adam optimizer parameters
             opt = tf.train.AdamOptimizer(1e-4)
             self.train_op = tf.group(opt.apply_gradients(grads_and_vars), inc_step)
             self.summary_writer = None
@@ -182,6 +239,9 @@ class A3C(object):
         self.summary_writer = summary_writer
 
     def pull_batch_from_queue(self):
+        """
+self explanatory:  take a rollout from the queue of the thread runner.
+"""
         rollout = self.runner.queue.get(timeout=600.0)
         while not rollout.terminal:
             try:
@@ -191,6 +251,12 @@ class A3C(object):
         return rollout
 
     def process(self, sess):
+        """
+process grabs a rollout that's been produced by the thread runner,
+and updates the parameters.  The update is then sent to the parameter
+server. 
+"""
+
         sess.run(self.sync)  # copy weights from shared to local
         rollout = self.pull_batch_from_queue()
         batch = process_rollout(rollout, gamma=0.99, lambda_=1.0)

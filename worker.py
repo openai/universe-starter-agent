@@ -66,6 +66,9 @@ def run(args, server):
     logger.info('reached %s steps. worker stopped.', global_step)
 
 def cluster_spec(num_workers, num_ps):
+    """
+More tensorflow setup for data parallelism
+""" 
     cluster = {}
     port = 12222
 
@@ -84,6 +87,10 @@ def cluster_spec(num_workers, num_ps):
     return cluster
 
 def main(_):
+    """
+Setting up Tensorflow for data parallel work
+"""
+
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0, help='Set verbosity.')
     parser.add_argument('--task', default=0, type=int, help='Task index')
@@ -94,6 +101,7 @@ def main(_):
     args = parser.parse_args()
     spec = cluster_spec(args.num_workers, 1)
     cluster = tf.train.ClusterSpec(spec).as_cluster_def()
+
 
     if args.job_name == "worker":
         server = tf.train.Server(cluster, job_name="worker", task_index=args.task,

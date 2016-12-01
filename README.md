@@ -1,7 +1,7 @@
 # universe-starter-agent
 
 The codebase implements a starter agent that can interact with `universe`.
-It contains a basic implementation of A3C algorithm, adapted for real-time environments.
+It contains a basic implementation of the A3C algorithm, adapted for real-time environments.
 
 # Dependencies
 
@@ -22,11 +22,11 @@ It contains a basic implementation of A3C algorithm, adapted for real-time envir
 `python train.py --num-workers 2 --env-id PongDeterministic-v3 --log-dir /tmp/pong`
 
 The command above will train an agent on Atari Pong using ALE simulator.
-It will play 2 games in parallel (`--num-workers` flag) and will output intermediate results into given directory.
+It will se two workers that will be learning in parallel (`--num-workers` flag) and will output intermediate results into given directory.
 
-The experiment will consist of following processes:
-* worker-0 - agent's process that interacts with the first game
-* worker-1
+The code will launch the following processes:
+* worker-0 - the first process that learns to solve the game
+* worker-1 - the second process that learns to solve the game
 * ps - process that synchronizes parameters of the agent across different workers (parameter server)
 * tb - tensorboard for monitoring progress of the agent
 
@@ -35,7 +35,9 @@ To see a window number 0, type: `ctrl-b 0`. Look up tmux documentation for more 
 
 To see various monitoring metrics of the agent, type: `http://localhost:22012/` in chrome, which will open TensorBoard.
 
-_Using 16 workers, the agent should be able to solve Pong within 30 minutes on `m4.10xlarge` instance_
+_Using 16 workers, the agent should be able to solve Pong within 30 minutes on an `m4.10xlarge` instance_
+_Using 32 workers, the agent is abel to solve Pong in 10 minutes on an `m4.16xlarge` instance_.
+If you run this experiment on a high-end macbook pro, the above code will take just under 2 hours to solve Pong.
 
 ![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/tb_pong.png "Pong")
 
@@ -50,7 +52,7 @@ Environments are hosted on EC2 cloud but with the help of various wrappers (take
 the experience should be similar to the agent as if it was played locally. The problem itself is more complicated
 because observations and actions are delayed due to network latencies.
 
-You can also peek what the agent is doing with a VNCViewer.
+More interestingly, you can also peek what the agent is doing with a VNCViewer.
 
 ### Atari
 
@@ -66,3 +68,8 @@ _Peeking into the agent's environment with TurboVNC_
 
 _What agent sees when playing Dusk Drive_
 ![dusk](https://github.com/openai/universe-starter-agent/raw/master/imgs/dusk_drive.png "Dusk Drive")
+
+
+### Next steps
+
+Now that you've seen how to interact with universe
