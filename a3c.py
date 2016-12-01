@@ -97,13 +97,9 @@ that would constantly interact with the environment and tell it what to do.  Thi
             # won't die with it, unless the timeout is set to some large number.  This is an empirical
             # observation.
 
-            try:
-                self.queue.get_nowait()
-            except queue.Empty:
-                pass  
             self.queue.put(next(rollout_provider), timeout=600.0)
 
-            # also note that we pop the most recent rollout from the queue.
+
             
 
 def env_runner(env, policy, num_local_steps, summary_writer):
