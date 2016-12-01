@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 parser = argparse.ArgumentParser(description="Run commands")
 parser.add_argument('-w', '--num-workers', default=1, type=int, 
@@ -16,7 +17,7 @@ def new_tmux_cmd(name, cmd):
 
 def create_tmux_commands(session, num_workers, env_id, logdir):
     # for launching the TF workers and for launching tensorboard
-    base_cmd = ['CUDA_VISIBLE_DEVICES=', 'python', 'worker.py', '--log-dir', logdir, '--env-id', env_id, '--num-workers', str(num_workers)]
+    base_cmd = ['CUDA_VISIBLE_DEVICES=', sys.executable, 'worker.py', '--log-dir', logdir, '--env-id', env_id, '--num-workers', str(num_workers)]
 
     cmds_map = [new_tmux_cmd("ps", base_cmd + ["--job-name", "ps"])]
     for i in range(num_workers):
