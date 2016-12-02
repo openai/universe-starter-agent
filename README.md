@@ -106,4 +106,6 @@ _What agent sees when playing Neon Race_
 
 ### Next steps
 
-Now that you've seen how to interact with universe
+Now that you have seen an example agent, develop agents of your own.  We hope that you will find
+doing so to be an exciting and an enjoyable task.
+
