@@ -102,6 +102,7 @@ You may run the following command to launch the agent on the game Neon Race:
 _What agent sees when playing Neon Race_
 ![neon](https://github.com/openai/universe-starter-agent/raw/master/imgs/neon_race.png "Neon Race")
 
+Solving the above game should take no more than 30 minutes on a machine that can support 16 workers.
 
 
 ### Next steps
