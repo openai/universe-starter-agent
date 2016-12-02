@@ -14,9 +14,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 universe.configure_logging()
 
-def create_env(env_id, client_id, n=1, **kwargs):
+def create_env(env_id, client_id, remotes, **kwargs):
     spec = gym.spec(env_id)
-    remotes = "http://allocator.sci.openai-tech.com?n={}".format(n)
 
     if spec.tags.get('flashgames', False):
         return create_flash_env(env_id, client_id, remotes, **kwargs)
