@@ -97,10 +97,10 @@ reaction time.
 
 You may run the following command to launch the agent on the game Neon Race:
 
-`python train.py --num-workers 2 --env-id flashgames.NeonRace-v0 --log-dir /tmp/duskdrive`
+`python train.py --num-workers 2 --env-id flashgames.NeonRace-v0 --log-dir /tmp/neonrace`
 
 _What agent sees when playing Neon Race_
-![dusk](https://github.com/openai/universe-starter-agent/raw/master/imgs/neon_race.png "Neon Race")
+![neon](https://github.com/openai/universe-starter-agent/raw/master/imgs/neon_race.png "Neon Race")
 
 
 
