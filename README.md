@@ -1,7 +1,7 @@
 # universe-starter-agent
 
 The codebase implements a starter agent that can solve a number of `universe` environments.
-It contains a basic implementation of the `A3C algorithm <https://https://arxiv.org/abs/1602.01783>_`, adapted for real-time environments.
+It contains a basic implementation of the [A3C algorithm](https://https://arxiv.org/abs/1602.01783), adapted for real-time environments.
 
 # Dependencies
 
