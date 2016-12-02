@@ -25,18 +25,18 @@ The command above will train an agent on Atari Pong using ALE simulator.
 It will see two workers that will be learning in parallel (`--num-workers` flag) and will output intermediate results into given directory.
 
 The code will launch the following processes:
-* worker-0 - the first process that learns to solve the game
-* worker-1 - the second process that learns to solve the game
-* ps - process that synchronizes parameters of the agent across different workers (parameter server)
-* tb - tensorboard for monitoring progress of the agent
+* worker-0 - a process that runs policy gradient
+* worker-1 - a process identical to process-1, that uses different random noise from the environment
+* ps - the parameter server, which synchronizes the parameters among the different workers
+* tb - a tensorboard process for convenient display of the statistics of learning
 
-Once you start the training, it will create a tmux session with a window for each of these processes. You can connect to them by typing `tmux a` in console.
+Once you start the training process, it will create a tmux session with a window for each of these processes. You can connect to them by typing `tmux a` in the console.
 To see a window number 0, type: `ctrl-b 0`. Look up tmux documentation for more commands.
 
-To see various monitoring metrics of the agent, type: `http://localhost:22012/` in chrome, which will open TensorBoard.
+To access TensorBoard to see various monitoring metrics of the agent, type: `http://localhost:22012/` in chrome.
 
-_Using 16 workers, the agent should be able to solve Pong within 30 minutes on an `m4.10xlarge` instance_
-_Using 32 workers, the agent is abel to solve Pong in 10 minutes on an `m4.16xlarge` instance_.
+Using 16 workers, the agent should be able to solve Pong within 30 minutes on an `m4.10xlarge` instance.
+Using 32 workers, the agent is abel to solve Pong in 10 minutes on an `m4.16xlarge` instance.
 If you run this experiment on a high-end macbook pro, the above code will take just under 2 hours to solve Pong.
 
 ![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/tb_pong.png "Pong")
@@ -47,12 +47,13 @@ You can stop the experiment with `tmux kill-session` command.
 
 ## Playing games over remote desktop
 
-The main difference to the previous experiment is that we are now going to play the game through VNC protocol.
-Environments are hosted on EC2 cloud but with the help of various wrappers (take a look at `envs.py` file)
-the experience should be similar to the agent as if it was played locally. The problem itself is more complicated
-because observations and actions are delayed due to network latencies.
+The main difference with the previous experiment is that now we are going to play the game through VNC protocol.
+The VNC environments are hosted on the EC2 cloud and have an interface that's different from a conventional Atari Gym
+environment;  luckily, with the help of several wrappers (which are used within `envs.py` file)
+the experience should be similar to the agent as if it was played locally. The problem itself is more difficult
+because the observations and actions are delayed due to the latency induced by the network.
 
-More interestingly, you can also peek what the agent is doing with a VNCViewer.
+More interestingly, you can also peek at what the agent is doing with a VNCViewer.
 
 ### Atari
 
@@ -64,13 +65,12 @@ _Peeking into the agent's environment with TurboVNC_
 
 #### Important caveats
 
-One of the key challenges in using universe environments is that they operate in *real time*, and that in addition,
-it takes time for the environment process to transmit the observation pixels to the agent.  This time creates a lag:
+One of the novel challenges in using Universe environments is that they operate in *real time*, and in addition,
+it takes time for the environment to transmit the observation to the agent.  This time creates a lag:
 where the greater the lag, the harder it is to solve environment with today's RL algorithms.  While the existence of
-the lag creates a challenge, an additional challenge is created by the fact that the lag depends on the speed of the
-network.  Thus, to get the best possible results, we strongly recommend that both the environments/allocator and the agent
-live on the same network.  So for example, if you have a fast local network, you could place the environments on one set
-of machines, and the agent on another machine that  can speak to the environments very quickly.  Alternatively, you can
+the lag creates a challenge. Thus, to get the best possible results, it is best to have both the environments/allocator and the agent
+live on the same network.  So for example, if you have a fast local network, you could host the environments on one set
+of machines, and the agent on another machine that can speak to the environments very quickly.  Alternatively, you can
 run the environments and the agent on the same EC2/Azure region.  If you do not do it, and, for example, run the environment
 on the cloud while the agent is run on your local machine, then the lag will be larger and performance will be worse.
 
