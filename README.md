@@ -65,27 +65,43 @@ _Peeking into the agent's environment with TurboVNC_
 
 #### Important caveats
 
-One of the novel challenges in using Universe environments is that they operate in *real time*, and in addition,
-it takes time for the environment to transmit the observation to the agent.  This time creates a lag:
-where the greater the lag, the harder it is to solve environment with today's RL algorithms.  While the existence of
-the lag creates a challenge. Thus, to get the best possible results, it is best to have both the environments/allocator and the agent
-live on the same network.  So for example, if you have a fast local network, you could host the environments on one set
-of machines, and the agent on another machine that can speak to the environments very quickly.  Alternatively, you can
-run the environments and the agent on the same EC2/Azure region.  If you do not do it, and, for example, run the environment
-on the cloud while the agent is run on your local machine, then the lag will be larger and performance will be worse.
+One of the novel challenges in using Universe environments is that
+they operate in *real time*, and in addition, it takes time for the
+environment to transmit the observation to the agent.  This time
+creates a lag: where the greater the lag, the harder it is to solve
+environment with today's RL algorithms.  Thus, to get the best
+possible results it is necessary to reduce the lag, which can be
+achieved by having both the environments/allocator and the agent live
+on the same high-speed computer network.  So for example, if you have
+a fast local network, you could host the environments on one set of
+machines, and the agent on another machine that can speak to the
+environments with low latency.  Alternatively, you can run the
+environments and the agent on the same EC2/Azure region.  Other configurations
+tend to have greater lag.
 
-In general, environments that are most affected by lag are games that are primarily focused on reaction time.  For example,
-this agent is able to solve Universe Pong (gym-core.PongDeterministic-v3)
-reasonably in under 2 hours when both the agent and the environment are co-located
-on the cloud, but this agent had difficulty solving Universe Pong when the environment was on the cloud while the
-agent was not.  This issue affects environments that place great emphasis on reaction time.  
+To keep track of your lag, look for the phrase `reaciton_time` in stdout.  If you run both the agent
+and the environment on nearby machines on the cloud, your `reaction_time` should be as low as 40ms.
+The `reaction_time` statistic is printed to stderr because we wrap our environment with the `Logger` wrapper,
+as done in [here](<https://github.com/openai/universe-starter-agent/blob/master/envs.py#L32>).
+
+Generally speaking, environments that are most affected by lag are
+games that place a lot of emphasis on reaction time.  For example, this
+agent is able to solve Universe Pong (`gym-core.PongDeterministic-v3`)
+in under 2 hours when both the agent and the environment
+are co-located on the cloud, but this agent had difficulty solving
+Universe Pong when the environment was on the cloud while the agent
+was not.  This issue affects environments that place great emphasis on
+reaction time.
 
 ### Playing flash games
 
-`python train.py --num-workers 2 --env-id flashgames.DuskDrive-v0 --log-dir /tmp/duskdrive`
+You may run the following command to launch the agent on the game Neon Race:
 
-_What agent sees when playing Dusk Drive_
-![dusk](https://github.com/openai/universe-starter-agent/raw/master/imgs/dusk_drive.png "Dusk Drive")
+`python train.py --num-workers 2 --env-id flashgames.NeonRace-v0 --log-dir /tmp/duskdrive`
+
+_What agent sees when playing Neon Race_
+![dusk](https://github.com/openai/universe-starter-agent/raw/master/imgs/neon_race.png "Neon Race")
+
 
 
 ### Next steps
