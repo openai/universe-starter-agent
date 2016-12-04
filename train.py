@@ -30,14 +30,14 @@ def create_tmux_commands(session, num_workers, remotes, env_id, logdir):
         '--num-workers', str(num_workers)]
 
     remotes = remotes.split(',')
-    remotes += ["http://allocator.sci.openai-tech.com?n=1" * (num_workers - len(remotes))]
+    remotes += ["http://allocator.sci.openai-tech.com?n=1"] * (num_workers - len(remotes))
 
     cmds_map = [new_tmux_cmd("ps", base_cmd + ["--job-name", "ps"])]
     for i in range(num_workers):
         cmds_map += [new_tmux_cmd(
             "w-%d" % i, base_cmd + ["--job-name", "worker", "--task", str(i), "--remotes", remotes[i]])]
 
-    cmds_map += [new_tmux_cmd("tb", ["tensorboard --logdir {} --port 22012".format(logdir)])]
+    cmds_map += [new_tmux_cmd("tb", ["tensorboard --logdir {} --port 12345".format(logdir)])]
     cmds_map += [new_tmux_cmd("htop", ["htop"])]
 
     windows = [v[0] for v in cmds_map]

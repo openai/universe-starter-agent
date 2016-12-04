@@ -33,7 +33,7 @@ The code will launch the following processes:
 Once you start the training process, it will create a tmux session with a window for each of these processes. You can connect to them by typing `tmux a` in the console.
 To see a window number 0, type: `ctrl-b 0`. Look up tmux documentation for more commands.
 
-To access TensorBoard to see various monitoring metrics of the agent, type: `http://localhost:22012/` in chrome.
+To access TensorBoard to see various monitoring metrics of the agent, type: `http://localhost:12345/` in chrome.
 
 Using 16 workers, the agent should be able to solve Pong within 30 minutes on an `m4.10xlarge` instance.
 Using 32 workers, the agent is abel to solve Pong in 10 minutes on an `m4.16xlarge` instance.
