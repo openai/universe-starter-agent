@@ -35,9 +35,9 @@ To see a window number 0, type: `ctrl-b 0`. Look up tmux documentation for more 
 
 To access TensorBoard to see various monitoring metrics of the agent, type: `http://localhost:12345/` in chrome.
 
-Using 16 workers, the agent should be able to solve Pong within 30 minutes on an `m4.10xlarge` instance.
-Using 32 workers, the agent is abel to solve Pong in 10 minutes on an `m4.16xlarge` instance.
-If you run this experiment on a high-end macbook pro, the above code will take just under 2 hours to solve Pong.
+Using 16 workers, the agent should be able to solve `PongDeterministic-v3` (not VNC) within 30 minutes (often less) on an `m4.10xlarge` instance.
+Using 32 workers, the agent is abel to solve the same environment in 10 minutes on an `m4.16xlarge` instance.
+If you run this experiment on a high-end macbook pro, the above job will take just under 2 hours to solve Pong.
 
 ![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/tb_pong.png "Pong")
 
@@ -54,6 +54,16 @@ the experience should be similar to the agent as if it was played locally. The p
 because the observations and actions are delayed due to the latency induced by the network.
 
 More interestingly, you can also peek at what the agent is doing with a VNCViewer.
+
+### non-VNC Atari 
+
+`python train.py --num-workers 2 --env-id gym-core.PongDeterministic-v3 --log-dir /tmp/pong`
+
+To montior your learning, please type
+
+`http://localhost:12345/`
+
+in your browser's URL.
 
 ### Atari
 
@@ -76,22 +86,29 @@ on the same high-speed computer network.  So for example, if you have
 a fast local network, you could host the environments on one set of
 machines, and the agent on another machine that can speak to the
 environments with low latency.  Alternatively, you can run the
-environments and the agent on the same EC2/Azure region.  Other configurations
-tend to have greater lag.
+environments and the agent on the same EC2/Azure region.  Other
+configurations tend to have greater lag.
 
-To keep track of your lag, look for the phrase `reaciton_time` in stdout.  If you run both the agent
-and the environment on nearby machines on the cloud, your `reaction_time` should be as low as 40ms.
-The `reaction_time` statistic is printed to stderr because we wrap our environment with the `Logger` wrapper,
-as done in [here](<https://github.com/openai/universe-starter-agent/blob/master/envs.py#L32>).
+To keep track of your lag, look for the phrase `reaciton_time` in
+stdout.  If you run both the agent and the environment on nearby
+machines on the cloud, your `reaction_time` should be as low as 40ms.
+The `reaction_time` statistic is printed to stderr because we wrap our
+environment with the `Logger` wrapper, as done in
+[here](<https://github.com/openai/universe-starter-agent/blob/master/envs.py#L32>).
 
 Generally speaking, environments that are most affected by lag are
-games that place a lot of emphasis on reaction time.  For example, this
-agent is able to solve Universe Pong (`gym-core.PongDeterministic-v3`)
-in under 2 hours when both the agent and the environment
-are co-located on the cloud, but this agent had difficulty solving
-Universe Pong when the environment was on the cloud while the agent
-was not.  This issue affects environments that place great emphasis on
-reaction time.
+games that place a lot of emphasis on reaction time.  For example,
+this agent is able to solve Universe Pong
+(`gym-core.PongDeterministic-v3`) in under 2 hours when both the agent
+and the environment are co-located on the cloud, but this agent had
+difficulty solving Universe Pong when the environment was on the cloud
+while the agent was not.  This issue affects environments that place
+great emphasis on reaction time.
+
+### A note on tuning
+
+This implementation has been tuned to do well on VNC Pong, and we do not guarantee
+its performance on other tasks.  It is meant as a starting point. 
 
 ### Playing flash games
 
@@ -105,8 +122,6 @@ _What agent sees when playing Neon Race_
 Getting 80% of the maximal score takes between 1 and 2 hours with 16 workers, and getting to 100% of the score
 takes about 12 hours.  Also, flash games are run at 5fps by default, so it should be possible to productively
 use 16 workers on a machine with 8 (and possibly even 4) cores. 
-
-
 
 ### Next steps
 
