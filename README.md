@@ -91,10 +91,10 @@ environment with the `Logger` wrapper, as done in
 
 Generally speaking, environments that are most affected by lag are
 games that place a lot of emphasis on reaction time.  For example,
-this agent is able to solve Universe Pong
+this agent is able to solve VNC Pong
 (`gym-core.PongDeterministic-v3`) in under 2 hours when both the agent
 and the environment are co-located on the cloud, but this agent had
-difficulty solving Universe Pong when the environment was on the cloud
+difficulty solving VNC Pong when the environment was on the cloud
 while the agent was not.  This issue affects environments that place
 great emphasis on reaction time.
 
