@@ -83,7 +83,7 @@ environment to transmit the observation to the agent.  This time
 creates a lag: where the greater the lag, the harder it is to solve
 environment with today's RL algorithms.  Thus, to get the best
 possible results it is necessary to reduce the lag, which can be
-achieved by having both the environments/allocator and the agent live
+achieved by having both the environments and the agent live
 on the same high-speed computer network.  So for example, if you have
 a fast local network, you could host the environments on one set of
 machines, and the agent on another machine that can speak to the
