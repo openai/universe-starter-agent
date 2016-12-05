@@ -9,6 +9,7 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 * six (for py2/3 compatibility)
 * TensorFlow 0.11
 * tmux (the start script opens up a tmux session with multiple windows)
+* htop (shown in one of the tmux windows)
 * gym
 * universe
 * opencv-python
