@@ -58,13 +58,7 @@ More interestingly, you can also peek at what the agent is doing with a VNCViewe
 
 Note that the default behavior of `train.py` is to start the remotes on a local machine. Take a look at https://github.com/openai/universe/blob/master/doc/remotes.rst for documentation on managing your remotes. Pass additional `-r` flag to point to pre-existing instances.
 
-### non-VNC Atari
-
-`python train.py --num-workers 2 --env-id gym-core.PongDeterministic-v3 --log-dir /tmp/pong`
-
-To monitor your learning, open [http://localhost:12345/](http://localhost:12345/) in a browser.
-
-### Atari
+### VNC Pong
 
 `python train.py --num-workers 2 --env-id gym-core.PongDeterministic-v3 --log-dir /tmp/vncpong`
 
