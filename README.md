@@ -89,7 +89,7 @@ environments and the agent on the same EC2/Azure region.  Other
 configurations tend to have greater lag.
 
 To keep track of your lag, look for the phrase `reaction_time` in
-stdout.  If you run both the agent and the environment on nearby
+stderr.  If you run both the agent and the environment on nearby
 machines on the cloud, your `reaction_time` should be as low as 40ms.
 The `reaction_time` statistic is printed to stderr because we wrap our
 environment with the `Logger` wrapper, as done in
