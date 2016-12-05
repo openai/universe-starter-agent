@@ -36,7 +36,7 @@ To see a window number 0, type: `ctrl-b 0`. Look up tmux documentation for more 
 To access TensorBoard to see various monitoring metrics of the agent, type: `http://localhost:12345/` in chrome.
 
 Using 16 workers, the agent should be able to solve `PongDeterministic-v3` (not VNC) within 30 minutes (often less) on an `m4.10xlarge` instance.
-Using 32 workers, the agent is abel to solve the same environment in 10 minutes on an `m4.16xlarge` instance.
+Using 32 workers, the agent is able to solve the same environment in 10 minutes on an `m4.16xlarge` instance.
 If you run this experiment on a high-end macbook pro, the above job will take just under 2 hours to solve Pong.
 
 ![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/tb_pong.png "Pong")
@@ -54,6 +54,8 @@ the experience should be similar to the agent as if it was played locally. The p
 because the observations and actions are delayed due to the latency induced by the network.
 
 More interestingly, you can also peek at what the agent is doing with a VNCViewer.
+
+Note that the default behavior of `train.py` is to start the remotes on a local machine. Take a look at https://github.com/openai/universe/blob/master/doc/remotes.rst for documentation on managing your remotes. Pass additional `-r` flag to point to pre-existing instances.
 
 ### non-VNC Atari 
 
