@@ -32,9 +32,9 @@ The code will launch the following processes:
 * tb - a tensorboard process for convenient display of the statistics of learning
 
 Once you start the training process, it will create a tmux session with a window for each of these processes. You can connect to them by typing `tmux a` in the console.
-To see a window number 0, type: `ctrl-b 0`. Look up tmux documentation for more commands.
+To see window number 0, type: `ctrl-b 0`. Look up tmux documentation for more commands.
 
-To access TensorBoard to see various monitoring metrics of the agent, type: `http://localhost:12345/` in chrome.
+To access TensorBoard to see various monitoring metrics of the agent, open [http://localhost:12345/](http://localhost:12345/) in a browser.
 
 Using 16 workers, the agent should be able to solve `PongDeterministic-v3` (not VNC) within 30 minutes (often less) on an `m4.10xlarge` instance.
 Using 32 workers, the agent is able to solve the same environment in 10 minutes on an `m4.16xlarge` instance.
