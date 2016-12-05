@@ -57,7 +57,7 @@ More interestingly, you can also peek at what the agent is doing with a VNCViewe
 
 Note that the default behavior of `train.py` is to start the remotes on a local machine. Take a look at https://github.com/openai/universe/blob/master/doc/remotes.rst for documentation on managing your remotes. Pass additional `-r` flag to point to pre-existing instances.
 
-### non-VNC Atari 
+### non-VNC Atari
 
 `python train.py --num-workers 2 --env-id gym-core.PongDeterministic-v3 --log-dir /tmp/pong`
 
@@ -110,7 +110,7 @@ great emphasis on reaction time.
 ### A note on tuning
 
 This implementation has been tuned to do well on VNC Pong, and we do not guarantee
-its performance on other tasks.  It is meant as a starting point. 
+its performance on other tasks.  It is meant as a starting point.
 
 ### Playing flash games
 
@@ -123,10 +123,9 @@ _What agent sees when playing Neon Race_
 
 Getting 80% of the maximal score takes between 1 and 2 hours with 16 workers, and getting to 100% of the score
 takes about 12 hours.  Also, flash games are run at 5fps by default, so it should be possible to productively
-use 16 workers on a machine with 8 (and possibly even 4) cores. 
+use 16 workers on a machine with 8 (and possibly even 4) cores.
 
 ### Next steps
 
 Now that you have seen an example agent, develop agents of your own.  We hope that you will find
 doing so to be an exciting and an enjoyable task.
-
