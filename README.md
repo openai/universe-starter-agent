@@ -62,11 +62,7 @@ Note that the default behavior of `train.py` is to start the remotes on a local 
 
 `python train.py --num-workers 2 --env-id gym-core.PongDeterministic-v3 --log-dir /tmp/pong`
 
-To montior your learning, please type
-
-`http://localhost:12345/`
-
-in your browser's URL.
+To monitor your learning, open [http://localhost:12345/](http://localhost:12345/) in a browser.
 
 ### Atari
 
