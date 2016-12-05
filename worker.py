@@ -101,8 +101,7 @@ Setting up Tensorflow for data parallel work
     parser.add_argument('-r', '--remotes', default='http://allocator.sci.openai-tech.com?n=1',
                         help='References to environments to create (e.g. -r 20), '
                              'or the address of pre-existing VNC servers and '
-                             'rewarders to use (e.g. -r vnc://localhost:5900+15900,vnc://localhost:5901+15901), '
-                             'or a query to the allocator (e.g. -r http://allocator.sci.openai-tech.com?n=2)')
+                             'rewarders to use (e.g. -r vnc://localhost:5900+15900,vnc://localhost:5901+15901)')
     args = parser.parse_args()
     spec = cluster_spec(args.num_workers, 1)
     cluster = tf.train.ClusterSpec(spec).as_cluster_def()

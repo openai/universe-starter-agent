@@ -5,11 +5,9 @@ import sys
 parser = argparse.ArgumentParser(description="Run commands")
 parser.add_argument('-w', '--num-workers', default=1, type=int,
                     help="Number of workers")
-parser.add_argument('-r', '--remotes', default='http://allocator.sci.openai-tech.com?n=1',
-                    help='References to environments to create (e.g. -r 20), '
-                         'or the address of pre-existing VNC servers and '
-                         'rewarders to use (e.g. -r vnc://localhost:5900+15900,vnc://localhost:5901+15901), '
-                         'or a query to the allocator (e.g. -r http://allocator.sci.openai-tech.com?n=2)')
+parser.add_argument('-r', '--remotes', default=None,
+                    help='The address of pre-existing VNC servers and '
+                         'rewarders to use (e.g. -r vnc://localhost:5900+15900,vnc://localhost:5901+15901).')
 parser.add_argument('-e', '--env-id', type=str, default="PongDeterministic-v3",
                     help="Environment id")
 parser.add_argument('-l', '--log-dir', type=str, default="/tmp/pong",
@@ -29,8 +27,11 @@ def create_tmux_commands(session, num_workers, remotes, env_id, logdir):
         '--log-dir', logdir, '--env-id', env_id,
         '--num-workers', str(num_workers)]
 
-    remotes = remotes.split(',')
-    remotes += ["http://allocator.sci.openai-tech.com?n=1"] * (num_workers - len(remotes))
+    if remotes is None:
+        remotes = ["1"] * num_workers
+    else:
+        remotes = remotes.split(',')
+        assert len(remotes) == num_workers
 
     cmds_map = [new_tmux_cmd("ps", base_cmd + ["--job-name", "ps"])]
     for i in range(num_workers):
