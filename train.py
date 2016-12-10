@@ -20,7 +20,7 @@ def new_tmux_cmd(name, cmd):
     return name, "tmux send-keys -t {} '{}' Enter".format(name, cmd)
 
 
-def create_tmux_commands(session, num_workers, remotes, env_id, logdir):
+def create_tmux_commands(session, num_workers, remotes, env_id, logdir, shell='sh'):
     # for launching the TF workers and for launching tensorboard
     base_cmd = [
         'CUDA_VISIBLE_DEVICES=', sys.executable, 'worker.py',
@@ -49,7 +49,7 @@ def create_tmux_commands(session, num_workers, remotes, env_id, logdir):
         "tmux new-session -s {} -n {} -d".format(session, windows[0]),
     ]
     for w in windows[1:]:
-        cmds += ["tmux new-window -t {} -n {}".format(session, w)]
+        cmds += ["tmux new-window -t {} -n {} {}".format(session, w, shell)]
     cmds += ["sleep 1"]
     for window, cmd in cmds_map:
         cmds += [cmd]
