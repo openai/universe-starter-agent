@@ -11,6 +11,7 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 * tmux (the start script opens up a tmux session with multiple windows)
 * htop (shown in one of the tmux windows)
 * gym
+* gym[atari]
 * universe
 * opencv-python
 * numpy
