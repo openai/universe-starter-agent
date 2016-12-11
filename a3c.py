@@ -34,7 +34,7 @@ Batch = namedtuple("Batch", ["si", "a", "adv", "r", "terminal", "features"])
 
 class PartialRollout(object):
     """
-a piece of a complete rollout.  We run our agent, and and process its experience
+a piece of a complete rollout.  We run our agent, and process its experience
 once it has processed enough steps.
 """
     def __init__(self):
