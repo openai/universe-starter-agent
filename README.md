@@ -6,16 +6,16 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 # Dependencies
 
 * Python 2.7 or 3.5
-* six (for py2/3 compatibility)
-* TensorFlow 0.11
-* tmux (the start script opens up a tmux session with multiple windows)
-* htop (shown in one of the tmux windows)
-* gym
+* [six](https://pypi.python.org/pypi/six) (for py2/3 compatibility)
+* [TensorFlow](https://www.tensorflow.org/) 0.11
+* [tmux](https://tmux.github.io/) (the start script opens up a tmux session with multiple windows)
+* [htop](https://hisham.hm/htop/) (shown in one of the tmux windows)
+* [gym](https://pypi.python.org/pypi/gym)
 * gym[atari]
-* universe
-* opencv-python
-* numpy
-* scipy
+* [universe](https://pypi.python.org/pypi/universe)
+* [opencv-python](https://pypi.python.org/pypi/opencv-python)
+* [numpy](https://pypi.python.org/pypi/numpy)
+* [scipy](https://pypi.python.org/pypi/scipy)
 
 # Getting Started
 
