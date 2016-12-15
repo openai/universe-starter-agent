@@ -93,7 +93,7 @@ that would constantly interact with the environment and tell it what to do.  Thi
     def _run(self):
         rollout_provider = env_runner(self.env, self.policy, self.num_local_steps, self.summary_writer)
         while True:
-            # the timeout variable exists becuase apparently, if one worker dies, the other workers
+            # the timeout variable exists because apparently, if one worker dies, the other workers
             # won't die with it, unless the timeout is set to some large number.  This is an empirical
             # observation.
 
