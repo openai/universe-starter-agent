@@ -65,6 +65,9 @@ Note that the default behavior of `train.py` is to start the remotes on a local 
 
 _Peeking into the agent's environment with TurboVNC_
 
+You can use your system viewer as `open vnc://localhost:5900` (or `open vnc://${docker_ip}:5900`) or connect TurboVNC to that ip/port.
+VNC password is `"openai"`.
+
 ![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/vnc_pong.png "Pong over VNC")
 
 #### Important caveats
@@ -111,6 +114,7 @@ You may run the following command to launch the agent on the game Neon Race:
 `python train.py --num-workers 2 --env-id flashgames.NeonRace-v0 --log-dir /tmp/neonrace`
 
 _What agent sees when playing Neon Race_
+(you can connect to this view via [note](#vnc-pong) above)
 ![neon](https://github.com/openai/universe-starter-agent/raw/master/imgs/neon_race.png "Neon Race")
 
 Getting 80% of the maximal score takes between 1 and 2 hours with 16 workers, and getting to 100% of the score
