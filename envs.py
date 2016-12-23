@@ -176,7 +176,7 @@ def _process_frame42(frame):
 class AtariRescale42x42(vectorized.ObservationWrapper):
     def __init__(self, env=None):
         super(AtariRescale42x42, self).__init__(env)
-        self.observation_space = Box(0, 255, [42, 42, 1])
+        self.observation_space = Box(0.0, 1.0, [42, 42, 1])
 
     def _observation(self, observation_n):
         return [_process_frame42(observation) for observation in observation_n]
@@ -249,7 +249,7 @@ def _process_frame_flash(frame):
 class FlashRescale(vectorized.ObservationWrapper):
     def __init__(self, env=None):
         super(FlashRescale, self).__init__(env)
-        self.observation_space = Box(0, 255, [128, 200, 1])
+        self.observation_space = Box(0.0, 1.0, [128, 200, 1])
 
     def _observation(self, observation_n):
         return [_process_frame_flash(observation) for observation in observation_n]
