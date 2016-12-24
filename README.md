@@ -6,16 +6,16 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 # Dependencies
 
 * Python 2.7 or 3.5
-* six (for py2/3 compatibility)
-* TensorFlow 0.11
-* tmux (the start script opens up a tmux session with multiple windows)
-* htop (shown in one of the tmux windows)
-* gym
+* [six](https://pypi.python.org/pypi/six) (for py2/3 compatibility)
+* [TensorFlow](https://www.tensorflow.org/) 0.11
+* [tmux](https://tmux.github.io/) (the start script opens up a tmux session with multiple windows)
+* [htop](https://hisham.hm/htop/) (shown in one of the tmux windows)
+* [gym](https://pypi.python.org/pypi/gym)
 * gym[atari]
-* universe
-* opencv-python
-* numpy
-* scipy
+* [universe](https://pypi.python.org/pypi/universe)
+* [opencv-python](https://pypi.python.org/pypi/opencv-python)
+* [numpy](https://pypi.python.org/pypi/numpy)
+* [scipy](https://pypi.python.org/pypi/scipy)
 
 # Getting Started
 
@@ -65,6 +65,9 @@ Note that the default behavior of `train.py` is to start the remotes on a local 
 
 _Peeking into the agent's environment with TurboVNC_
 
+You can use your system viewer as `open vnc://localhost:5900` (or `open vnc://${docker_ip}:5900`) or connect TurboVNC to that ip/port.
+VNC password is `"openai"`.
+
 ![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/vnc_pong.png "Pong over VNC")
 
 #### Important caveats
@@ -111,6 +114,7 @@ You may run the following command to launch the agent on the game Neon Race:
 `python train.py --num-workers 2 --env-id flashgames.NeonRace-v0 --log-dir /tmp/neonrace`
 
 _What agent sees when playing Neon Race_
+(you can connect to this view via [note](#vnc-pong) above)
 ![neon](https://github.com/openai/universe-starter-agent/raw/master/imgs/neon_race.png "Neon Race")
 
 Getting 80% of the maximal score takes between 1 and 2 hours with 16 workers, and getting to 100% of the score

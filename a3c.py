@@ -34,7 +34,7 @@ Batch = namedtuple("Batch", ["si", "a", "adv", "r", "terminal", "features"])
 
 class PartialRollout(object):
     """
-a piece of a complete rollout.  We run our agent, and and process its experience
+a piece of a complete rollout.  We run our agent, and process its experience
 once it has processed enough steps.
 """
     def __init__(self):
@@ -93,7 +93,7 @@ that would constantly interact with the environment and tell it what to do.  Thi
     def _run(self):
         rollout_provider = env_runner(self.env, self.policy, self.num_local_steps, self.summary_writer)
         while True:
-            # the timeout variable exists becuase apparently, if one worker dies, the other workers
+            # the timeout variable exists because apparently, if one worker dies, the other workers
             # won't die with it, unless the timeout is set to some large number.  This is an empirical
             # observation.
 
@@ -105,7 +105,7 @@ that would constantly interact with the environment and tell it what to do.  Thi
 def env_runner(env, policy, num_local_steps, summary_writer):
     """
 The logic of the thread runner.  In brief, it constantly keeps on running
-the policy, and as long as the rollout exceeds a certain length, the therad 
+the policy, and as long as the rollout exceeds a certain length, the thread 
 runner appends the policy to the queue.
 """
     last_state = env.reset()
@@ -160,7 +160,7 @@ class A3C(object):
         """
 An implementation of the A3C algorithm that is reasonably well-tuned for the VNC environments.
 Below, we will have a modest amount of complexity due to the way TensorFlow handles data parallelism.
-But overall, we'll define the model, specify its inputs, and describe how the policy graidents step
+But overall, we'll define the model, specify its inputs, and describe how the policy gradients step
 should be computed.
 """
 
