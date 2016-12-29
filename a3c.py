@@ -138,10 +138,10 @@ runner appends the policy to the queue.
                 summary_writer.add_summary(summary, policy.global_step.eval())
                 summary_writer.flush()
 
-
-            if terminal or length >= env.spec.timestep_limit:
+            timestep_limit = env.spec.tags.get('wrapper_config.TimeLimit.max_episode_steps')
+            if terminal or length >= timestep_limit:
                 terminal_end = True
-                if length >= env.spec.timestep_limit or not env.metadata.get('semantics.autoreset'):
+                if length >= timestep_limit or not env.metadata.get('semantics.autoreset'):
                     last_state = env.reset()
                 last_features = policy.get_initial_features()
                 print("Episode finished. Sum of rewards: %d. Length: %d" % (rewards, length))
