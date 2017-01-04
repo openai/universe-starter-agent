@@ -34,7 +34,7 @@ def run(args, server):
 
     config = tf.ConfigProto(device_filters=["/job:ps", "/job:worker/task:{}/cpu:0".format(args.task)])
     logdir = os.path.join(args.log_dir, 'train')
-    summary_writer = tf.train.SummaryWriter(logdir + "_%d" % args.task)
+    summary_writer = tf.summary.FileWriter(logdir + "_%d" % args.task)
     logger.info("Events directory: %s_%s", logdir, args.task)
     sv = tf.train.Supervisor(is_chief=(args.task == 0),
                              logdir=logdir,
