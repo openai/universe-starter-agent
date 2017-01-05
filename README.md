@@ -7,7 +7,7 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 
 * Python 2.7 or 3.5
 * [six](https://pypi.python.org/pypi/six) (for py2/3 compatibility)
-* [TensorFlow](https://www.tensorflow.org/) 0.11
+* [TensorFlow](https://www.tensorflow.org/) 0.12
 * [tmux](https://tmux.github.io/) (the start script opens up a tmux session with multiple windows)
 * [htop](https://hisham.hm/htop/) (shown in one of the tmux windows)
 * [gym](https://pypi.python.org/pypi/gym)
