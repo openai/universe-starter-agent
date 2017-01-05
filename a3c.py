@@ -170,7 +170,7 @@ should be computed.
         with tf.device(tf.train.replica_device_setter(1, worker_device=worker_device)):
             with tf.variable_scope("global"):
                 self.network = LSTMPolicy(env.observation_space.shape, env.action_space.n)
-                self.global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.zeros_initializer(),
+                self.global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.zeros_initializer,
                                                    trainable=False)
 
         with tf.device(worker_device):
@@ -208,14 +208,14 @@ should be computed.
 
             grads = tf.gradients(self.loss, pi.var_list)
 
-            tf.summary.scalar("model/policy_loss", pi_loss / bs)
-            tf.summary.scalar("model/value_loss", vf_loss / bs)
-            tf.summary.scalar("model/entropy", entropy / bs)
-            tf.summary.image("model/state", pi.x)
-            tf.summary.scalar("model/grad_global_norm", tf.global_norm(grads))
-            tf.summary.scalar("model/var_global_norm", tf.global_norm(pi.var_list))
+            tf.scalar_summary("model/policy_loss", pi_loss / bs)
+            tf.scalar_summary("model/value_loss", vf_loss / bs)
+            tf.scalar_summary("model/entropy", entropy / bs)
+            tf.image_summary("model/state", pi.x)
+            tf.scalar_summary("model/grad_global_norm", tf.global_norm(grads))
+            tf.scalar_summary("model/var_global_norm", tf.global_norm(pi.var_list))
 
-            self.summary_op = tf.summary.merge_all()
+            self.summary_op = tf.merge_all_summaries()
             grads, _ = tf.clip_by_global_norm(grads, 40.0)
 
             # copy weights from the parameter server to the local model
