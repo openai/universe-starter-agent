@@ -100,12 +100,12 @@ that would constantly interact with the environment and tell it what to do.  Thi
             self.queue.put(next(rollout_provider), timeout=600.0)
 
 
-
+            
 
 def env_runner(env, policy, num_local_steps, summary_writer):
     """
 The logic of the thread runner.  In brief, it constantly keeps on running
-the policy, and as long as the rollout exceeds a certain length, the thread
+the policy, and as long as the rollout exceeds a certain length, the thread 
 runner appends the policy to the queue.
 """
     last_state = env.reset()
@@ -170,7 +170,7 @@ should be computed.
         with tf.device(tf.train.replica_device_setter(1, worker_device=worker_device)):
             with tf.variable_scope("global"):
                 self.network = LSTMPolicy(env.observation_space.shape, env.action_space.n)
-                self.global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.zeros_initializer,
+                self.global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.zeros_initializer(),
                                                    trainable=False)
 
         with tf.device(worker_device):
@@ -250,7 +250,7 @@ self explanatory:  take a rollout from the queue of the thread runner.
         """
 process grabs a rollout that's been produced by the thread runner,
 and updates the parameters.  The update is then sent to the parameter
-server.
+server. 
 """
 
         sess.run(self.sync)  # copy weights from shared to local

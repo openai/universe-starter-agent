@@ -23,9 +23,9 @@ def run(args, server):
     trainer = A3C(env, args.task)
 
     # Variable names that start with "local" are not saved in checkpoints.
-    variables_to_save = [v for v in tf.global_variables() if not v.name.startswith("local")]
-    init_op = tf.variables_initializer(variables_to_save)
-    init_all_op = tf.global_variables_initializer()
+    variables_to_save = [v for v in tf.all_variables() if not v.name.startswith("local")]
+    init_op = tf.initialize_variables(variables_to_save)
+    init_all_op = tf.initialize_all_variables()
     saver = FastSaver(variables_to_save)
 
     def init_fn(ses):
