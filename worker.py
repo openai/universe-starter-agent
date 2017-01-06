@@ -5,6 +5,7 @@ import tensorflow as tf
 import argparse
 import logging
 import os
+import universe.utils
 from a3c import A3C
 from envs import create_env
 
@@ -107,6 +108,7 @@ Setting up Tensorflow for data parallel work
     spec = cluster_spec(args.num_workers, 1)
     cluster = tf.train.ClusterSpec(spec).as_cluster_def()
 
+    universe.utils.exit_on_signal()
 
     if args.job_name == "worker":
         server = tf.train.Server(cluster, job_name="worker", task_index=args.task,
