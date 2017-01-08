@@ -4,6 +4,7 @@ import go_vncdriver
 import tensorflow as tf
 import argparse
 import logging
+import time
 import os
 import universe.utils
 from a3c import A3C
@@ -117,8 +118,8 @@ Setting up Tensorflow for data parallel work
     else:
         server = tf.train.Server(cluster, job_name="ps", task_index=args.task,
                                  config=tf.ConfigProto(device_filters=["/job:ps"]))
-
-        server.join()
+        while True:
+            time.sleep(1000)
 
 if __name__ == "__main__":
     tf.app.run()
