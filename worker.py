@@ -30,6 +30,11 @@ def run(args, server):
     init_all_op = tf.global_variables_initializer()
     saver = FastSaver(variables_to_save)
 
+    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, tf.get_variable_scope().name)
+    logger.info('Trainable vars:')
+    for v in var_list:
+        logger.info('  %s %s', v.name, v.get_shape())
+
     def init_fn(ses):
         logger.info("Initializing all parameters.")
         ses.run(init_all_op)
