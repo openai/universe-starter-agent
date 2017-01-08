@@ -100,12 +100,12 @@ that would constantly interact with the environment and tell it what to do.  Thi
             self.queue.put(next(rollout_provider), timeout=600.0)
 
 
-
+            
 
 def env_runner(env, policy, num_local_steps, summary_writer):
     """
 The logic of the thread runner.  In brief, it constantly keeps on running
-the policy, and as long as the rollout exceeds a certain length, the thread
+the policy, and as long as the rollout exceeds a certain length, the thread 
 runner appends the policy to the queue.
 """
     last_state = env.reset()
@@ -208,14 +208,14 @@ should be computed.
 
             grads = tf.gradients(self.loss, pi.var_list)
 
-            tf.summary.scalar("model/policy_loss", pi_loss / bs)
-            tf.summary.scalar("model/value_loss", vf_loss / bs)
-            tf.summary.scalar("model/entropy", entropy / bs)
-            tf.summary.image("model/state", pi.x)
-            tf.summary.scalar("model/grad_global_norm", tf.global_norm(grads))
-            tf.summary.scalar("model/var_global_norm", tf.global_norm(pi.var_list))
+            tf.scalar_summary("model/policy_loss", pi_loss / bs)
+            tf.scalar_summary("model/value_loss", vf_loss / bs)
+            tf.scalar_summary("model/entropy", entropy / bs)
+            tf.image_summary("model/state", pi.x)
+            tf.scalar_summary("model/grad_global_norm", tf.global_norm(grads))
+            tf.scalar_summary("model/var_global_norm", tf.global_norm(pi.var_list))
 
-            self.summary_op = tf.summary.merge_all()
+            self.summary_op = tf.merge_all_summaries()
             grads, _ = tf.clip_by_global_norm(grads, 40.0)
 
             # copy weights from the parameter server to the local model
@@ -250,7 +250,7 @@ self explanatory:  take a rollout from the queue of the thread runner.
         """
 process grabs a rollout that's been produced by the thread runner,
 and updates the parameters.  The update is then sent to the parameter
-server.
+server. 
 """
 
         sess.run(self.sync)  # copy weights from shared to local

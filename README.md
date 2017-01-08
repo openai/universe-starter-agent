@@ -7,7 +7,7 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 
 * Python 2.7 or 3.5
 * [six](https://pypi.python.org/pypi/six) (for py2/3 compatibility)
-* [TensorFlow](https://www.tensorflow.org/) 0.12
+* [TensorFlow](https://www.tensorflow.org/) 0.11
 * [tmux](https://tmux.github.io/) (the start script opens up a tmux session with multiple windows)
 * [htop](https://hisham.hm/htop/) (shown in one of the tmux windows)
 * [gym](https://pypi.python.org/pypi/gym)
@@ -18,6 +18,23 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 * [scipy](https://pypi.python.org/pypi/scipy)
 
 # Getting Started
+
+```
+conda create --name universe-starter-agent python=3.5
+source activate universe-starter-agent
+
+brew install tmux htop
+pip install gym[atari]
+pip install universe
+pip install six
+yes | conda install -c conda-forge tensorflow
+yes | conda install -c https://conda.binstar.org/menpo opencv3
+yes | conda install numpy
+yes | conda install scipy
+```
+
+Add the following to your `.bashrc` so that you'll have the correct environment when the `train.py` script spawns new bash shells
+```source activate universe-starter-agent```
 
 ## Atari Pong
 
@@ -33,7 +50,8 @@ The code will launch the following processes:
 * tb - a tensorboard process for convenient display of the statistics of learning
 
 Once you start the training process, it will create a tmux session with a window for each of these processes. You can connect to them by typing `tmux a` in the console.
-To see window number 0, type: `ctrl-b 0`. Look up tmux documentation for more commands.
+Once in the tmux session, you can wee all your windows with `ctrl-b w`.
+To switch to window number 0, type: `ctrl-b 0`. Look up tmux documentation for more commands.
 
 To access TensorBoard to see various monitoring metrics of the agent, open [http://localhost:12345/](http://localhost:12345/) in a browser.
 

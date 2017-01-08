@@ -25,9 +25,9 @@ def run(args, server):
     trainer = A3C(env, args.task)
 
     # Variable names that start with "local" are not saved in checkpoints.
-    variables_to_save = [v for v in tf.global_variables() if not v.name.startswith("local")]
-    init_op = tf.variables_initializer(variables_to_save)
-    init_all_op = tf.global_variables_initializer()
+    variables_to_save = [v for v in tf.all_variables() if not v.name.startswith("local")]
+    init_op = tf.initialize_variables(variables_to_save)
+    init_all_op = tf.initialize_all_variables()
     saver = FastSaver(variables_to_save)
 
     var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, tf.get_variable_scope().name)
@@ -41,7 +41,7 @@ def run(args, server):
 
     config = tf.ConfigProto(device_filters=["/job:ps", "/job:worker/task:{}/cpu:0".format(args.task)])
     logdir = os.path.join(args.log_dir, 'train')
-    summary_writer = tf.summary.FileWriter(logdir + "_%d" % args.task)
+    summary_writer = tf.train.SummaryWriter(logdir + "_%d" % args.task)
     logger.info("Events directory: %s_%s", logdir, args.task)
     sv = tf.train.Supervisor(is_chief=(args.task == 0),
                              logdir=logdir,
