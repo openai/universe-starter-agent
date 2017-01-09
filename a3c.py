@@ -6,7 +6,8 @@ from model import LSTMPolicy
 import six.moves.queue as queue
 import scipy.signal
 import threading
-
+import distutils.version
+use_tf12_api = distutils.version.LooseVersion(tf.VERSION) >= distutils.version.LooseVersion('0.12.0')
 
 def discount(x, gamma):
     return scipy.signal.lfilter([1], [1, -gamma], x[::-1], axis=0)[::-1]
@@ -208,14 +209,24 @@ should be computed.
 
             grads = tf.gradients(self.loss, pi.var_list)
 
-            tf.scalar_summary("model/policy_loss", pi_loss / bs)
-            tf.scalar_summary("model/value_loss", vf_loss / bs)
-            tf.scalar_summary("model/entropy", entropy / bs)
-            tf.image_summary("model/state", pi.x)
-            tf.scalar_summary("model/grad_global_norm", tf.global_norm(grads))
-            tf.scalar_summary("model/var_global_norm", tf.global_norm(pi.var_list))
+            if use_tf12_api:
+                tf.summary.scalar("model/policy_loss", pi_loss / bs)
+                tf.summary.scalar("model/value_loss", vf_loss / bs)
+                tf.summary.scalar("model/entropy", entropy / bs)
+                tf.summary.image("model/state", pi.x)
+                tf.summary.scalar("model/grad_global_norm", tf.global_norm(grads))
+                tf.summary.scalar("model/var_global_norm", tf.global_norm(pi.var_list))
+                self.summary_op = tf.summary.merge_all()
 
-            self.summary_op = tf.summary.merge_all()
+            else:
+                tf.scalar_summary("model/policy_loss", pi_loss / bs)
+                tf.scalar_summary("model/value_loss", vf_loss / bs)
+                tf.scalar_summary("model/entropy", entropy / bs)
+                tf.image_summary("model/state", pi.x)
+                tf.scalar_summary("model/grad_global_norm", tf.global_norm(grads))
+                tf.scalar_summary("model/var_global_norm", tf.global_norm(pi.var_list))
+                self.summary_op = tf.merge_all_summaries()
+
             grads, _ = tf.clip_by_global_norm(grads, 40.0)
 
             # copy weights from the parameter server to the local model

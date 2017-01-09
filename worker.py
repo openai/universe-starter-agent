@@ -4,11 +4,13 @@ import go_vncdriver
 import tensorflow as tf
 import argparse
 import logging
+import sys, signal
 import time
 import os
-import universe.utils
 from a3c import A3C
 from envs import create_env
+import distutils.version
+use_tf12_api = distutils.version.LooseVersion(tf.VERSION) >= distutils.version.LooseVersion('0.12.0')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -25,9 +27,14 @@ def run(args, server):
     trainer = A3C(env, args.task)
 
     # Variable names that start with "local" are not saved in checkpoints.
-    variables_to_save = [v for v in tf.all_variables() if not v.name.startswith("local")]
-    init_op = tf.initialize_variables(variables_to_save)
-    init_all_op = tf.initialize_all_variables()
+    if use_tf12_api:
+        variables_to_save = [v for v in tf.global_variables() if not v.name.startswith("local")]
+        init_op = tf.variables_initializer(variables_to_save)
+        init_all_op = tf.global_variables_initializer()
+    else:
+        variables_to_save = [v for v in tf.all_variables() if not v.name.startswith("local")]
+        init_op = tf.initialize_variables(variables_to_save)
+        init_all_op = tf.initialize_all_variables()
     saver = FastSaver(variables_to_save)
 
     var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, tf.get_variable_scope().name)
@@ -42,7 +49,11 @@ def run(args, server):
     config = tf.ConfigProto(device_filters=["/job:ps", "/job:worker/task:{}/cpu:0".format(args.task)])
     logdir = os.path.join(args.log_dir, 'train')
 
-    summary_writer = tf.summary.FileWriter(logdir + "_%d" % args.task)
+    if use_tf12_api:
+        summary_writer = tf.summary.FileWriter(logdir + "_%d" % args.task)
+    else:
+        summary_writer = tf.train.SummaryWriter(logdir + "_%d" % args.task)
+
     logger.info("Events directory: %s_%s", logdir, args.task)
     sv = tf.train.Supervisor(is_chief=(args.task == 0),
                              logdir=logdir,
@@ -115,7 +126,12 @@ Setting up Tensorflow for data parallel work
     spec = cluster_spec(args.num_workers, 1)
     cluster = tf.train.ClusterSpec(spec).as_cluster_def()
 
-    universe.utils.exit_on_signal()
+    def shutdown(signal, frame):
+        logger.warn('Received signal %s: exiting', signal)
+        sys.exit(128+signal)
+    signal.signal(signal.SIGHUP, shutdown)
+    signal.signal(signal.SIGINT, shutdown)
+    signal.signal(signal.SIGTERM, shutdown)
 
     if args.job_name == "worker":
         server = tf.train.Server(cluster, job_name="worker", task_index=args.task,

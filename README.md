@@ -23,15 +23,17 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 conda create --name universe-starter-agent python=3.5
 source activate universe-starter-agent
 
-brew install tmux htop
+brew install tmux htop      # On Linux use sudo apt-get install -y tmux htop
+
 pip install gym[atari]
 pip install universe
 pip install six
-yes | conda install -c conda-forge tensorflow
-yes | conda install -c https://conda.binstar.org/menpo opencv3
-yes | conda install numpy
-yes | conda install scipy
+pip install tensorflow
+conda install -y -c https://conda.binstar.org/menpo opencv3
+conda install -y numpy
+conda install -y scipy
 ```
+
 
 Add the following to your `.bashrc` so that you'll have the correct environment when the `train.py` script spawns new bash shells
 ```source activate universe-starter-agent```
