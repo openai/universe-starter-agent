@@ -4,7 +4,9 @@ import go_vncdriver
 import tensorflow as tf
 import argparse
 import logging
+import time
 import os
+import universe.utils
 from a3c import A3C
 from envs import create_env
 
@@ -27,6 +29,11 @@ def run(args, server):
     init_op = tf.initialize_variables(variables_to_save)
     init_all_op = tf.initialize_all_variables()
     saver = FastSaver(variables_to_save)
+
+    var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, tf.get_variable_scope().name)
+    logger.info('Trainable vars:')
+    for v in var_list:
+        logger.info('  %s %s', v.name, v.get_shape())
 
     def init_fn(ses):
         logger.info("Initializing all parameters.")
@@ -107,6 +114,7 @@ Setting up Tensorflow for data parallel work
     spec = cluster_spec(args.num_workers, 1)
     cluster = tf.train.ClusterSpec(spec).as_cluster_def()
 
+    universe.utils.exit_on_signal()
 
     if args.job_name == "worker":
         server = tf.train.Server(cluster, job_name="worker", task_index=args.task,
@@ -115,8 +123,8 @@ Setting up Tensorflow for data parallel work
     else:
         server = tf.train.Server(cluster, job_name="ps", task_index=args.task,
                                  config=tf.ConfigProto(device_filters=["/job:ps"]))
-
-        server.join()
+        while True:
+            time.sleep(1000)
 
 if __name__ == "__main__":
     tf.app.run()

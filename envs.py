@@ -39,6 +39,11 @@ def create_flash_env(env_id, client_id, remotes, **_):
     env = FlashRescale(env)
 
     keys = ['left', 'right', 'up', 'down', 'x']
+    if env_id == 'flashgames.NeonRace-v0':
+        # Better key space for this game.
+        keys = ['left', 'right', 'up', 'left up', 'right up', 'down', 'up x']
+    logger.info('create_flash_env(%s): keys=%s', env_id, keys)
+
     env = DiscreteToFixedKeysVNCActions(env, keys)
     env = EpisodeID(env)
     env = DiagnosticsInfo(env)
@@ -204,21 +209,38 @@ class FixedKeyState(object):
         return action_n
 
 class DiscreteToFixedKeysVNCActions(vectorized.ActionWrapper):
+    """
+    Define a fixed action space. Action 0 is all keys up. Each element of keys can be a single key or a space-separated list of keys
+
+    For example,
+       e=DiscreteToFixedKeysVNCActions(e, ['left', 'right'])
+    will have 3 actions: [none, left, right]
+
+    You can define a state with more than one key down by separating with spaces. For example,
+       e=DiscreteToFixedKeysVNCActions(e, ['left', 'right', 'space', 'left space', 'right space'])
+    will have 6 actions: [none, left, right, space, left space, right space]
+    """
     def __init__(self, env, keys):
         super(DiscreteToFixedKeysVNCActions, self).__init__(env)
 
         self._keys = keys
         self._generate_actions()
         self.action_space = spaces.Discrete(len(self._actions))
-        self.key_state = FixedKeyState(keys)
 
     def _generate_actions(self):
         self._actions = []
+        uniq_keys = set()
+        for key in self._keys:
+            for cur_key in key.split(' '):
+                uniq_keys.add(cur_key)
+
         for key in [''] + self._keys:
+            split_keys = key.split(' ')
             cur_action = []
-            for cur_key in self._keys:
-                cur_action.append(vnc_spaces.KeyEvent.by_name(cur_key, down=cur_key == key))
+            for cur_key in uniq_keys:
+                cur_action.append(vnc_spaces.KeyEvent.by_name(cur_key, down=(cur_key in split_keys)))
             self._actions.append(cur_action)
+        self.key_state = FixedKeyState(uniq_keys)
 
     def _action(self, action_n):
         # Each action might be a length-1 np.array. Cast to int to
