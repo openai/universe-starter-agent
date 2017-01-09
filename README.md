@@ -59,7 +59,7 @@ To access TensorBoard to see various monitoring metrics of the agent, open [http
 
 Using 16 workers, the agent should be able to solve `PongDeterministic-v3` (not VNC) within 30 minutes (often less) on an `m4.10xlarge` instance.
 Using 32 workers, the agent is able to solve the same environment in 10 minutes on an `m4.16xlarge` instance.
-If you run this experiment on a high-end macbook pro, the above job will take just under 2 hours to solve Pong.
+If you run this experiment on a high-end MacBook Pro, the above job will take just under 2 hours to solve Pong.
 
 ![pong](https://github.com/openai/universe-starter-agent/raw/master/imgs/tb_pong.png "Pong")
 
