@@ -153,7 +153,7 @@ runner appends the policy to the queue.
         if not terminal_end:
             rollout.r = policy.value(last_state, *last_features)
 
-        # once we have enough experience, yield it, and have the TheradRunner place it on a queue
+        # once we have enough experience, yield it, and have the ThreadRunner place it on a queue
         yield rollout
 
 class A3C(object):
