@@ -94,6 +94,8 @@ def run():
     print("\n".join(cmds))
     print("")
     if not args.dry_run:
+        if args.mode == "tmux":
+            os.environ["TMUX"] = ""
         os.system("\n".join(cmds))
     print('\n'.join(notes))
 
