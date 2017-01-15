@@ -52,7 +52,7 @@ The code will launch the following processes:
 * tb - a tensorboard process for convenient display of the statistics of learning
 
 Once you start the training process, it will create a tmux session with a window for each of these processes. You can connect to them by typing `tmux a` in the console.
-Once in the tmux session, you can wee all your windows with `ctrl-b w`.
+Once in the tmux session, you can see all your windows with `ctrl-b w`.
 To switch to window number 0, type: `ctrl-b 0`. Look up tmux documentation for more commands.
 
 To access TensorBoard to see various monitoring metrics of the agent, open [http://localhost:12345/](http://localhost:12345/) in a browser.
