@@ -102,8 +102,7 @@ that would constantly interact with the environment and tell it what to do.  Thi
 
 
 
-
-def env_runner(env, policy, num_local_steps, summary_writer):
+def env_runner(env, policy, num_local_steps, summary_writer, render=True):
     """
 The logic of the thread runner.  In brief, it constantly keeps on running
 the policy, and as long as the rollout exceeds a certain length, the thread
@@ -123,6 +122,8 @@ runner appends the policy to the queue.
             action, value_, features = fetched[0], fetched[1], fetched[2:]
             # argmax to convert from one-hot
             state, reward, terminal, info = env.step(action.argmax())
+            if render:
+                env.render()
 
             # collect the experience
             rollout.add(last_state, action, reward, value_, terminal, last_features)
