@@ -71,7 +71,7 @@ One of the key distinctions between a normal environment and a universe environm
 is that a universe environment is _real time_.  This means that there should be a thread
 that would constantly interact with the environment and tell it what to do.  This thread is here.
 """
-    def __init__(self, env, policy, num_local_steps):
+    def __init__(self, env, policy, num_local_steps, visualise):
         threading.Thread.__init__(self)
         self.queue = queue.Queue(5)
         self.num_local_steps = num_local_steps
@@ -81,6 +81,7 @@ that would constantly interact with the environment and tell it what to do.  Thi
         self.daemon = True
         self.sess = None
         self.summary_writer = None
+        self.visualise = visualise
 
     def start_runner(self, sess, summary_writer):
         self.sess = sess
@@ -92,7 +93,7 @@ that would constantly interact with the environment and tell it what to do.  Thi
             self._run()
 
     def _run(self):
-        rollout_provider = env_runner(self.env, self.policy, self.num_local_steps, self.summary_writer)
+        rollout_provider = env_runner(self.env, self.policy, self.num_local_steps, self.summary_writer, self.visualise)
         while True:
             # the timeout variable exists because apparently, if one worker dies, the other workers
             # won't die with it, unless the timeout is set to some large number.  This is an empirical
@@ -102,7 +103,7 @@ that would constantly interact with the environment and tell it what to do.  Thi
 
 
 
-def env_runner(env, policy, num_local_steps, summary_writer, render=True):
+def env_runner(env, policy, num_local_steps, summary_writer, render):
     """
 The logic of the thread runner.  In brief, it constantly keeps on running
 the policy, and as long as the rollout exceeds a certain length, the thread
@@ -158,7 +159,7 @@ runner appends the policy to the queue.
         yield rollout
 
 class A3C(object):
-    def __init__(self, env, task):
+    def __init__(self, env, task, visualise):
         """
 An implementation of the A3C algorithm that is reasonably well-tuned for the VNC environments.
 Below, we will have a modest amount of complexity due to the way TensorFlow handles data parallelism.
@@ -205,7 +206,7 @@ should be computed.
             # on the one hand;  but on the other hand, we get less frequent parameter updates, which
             # slows down learning.  In this code, we found that making local steps be much
             # smaller than 20 makes the algorithm more difficult to tune and to get to work.
-            self.runner = RunnerThread(env, pi, 20)
+            self.runner = RunnerThread(env, pi, 20, visualise)
 
 
             grads = tf.gradients(self.loss, pi.var_list)
