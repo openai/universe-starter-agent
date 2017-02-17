@@ -52,7 +52,7 @@ class LSTMPolicy(object):
         x = tf.expand_dims(flatten(x), [0])
 
         size = 256
-        lstm = rnn.rnn_cell.BasicLSTMCell(size, state_is_tuple=True)
+        lstm = rnn.BasicLSTMCell(size, state_is_tuple=True)
         self.state_size = lstm.state_size
         step_size = tf.shape(self.x)[:1]
 
@@ -63,7 +63,7 @@ class LSTMPolicy(object):
         h_in = tf.placeholder(tf.float32, [1, lstm.state_size.h])
         self.state_in = [c_in, h_in]
 
-        state_in = rnn.rnn_cell.LSTMStateTuple(c_in, h_in)
+        state_in = rnn.LSTMStateTuple(c_in, h_in)
         lstm_outputs, lstm_state = tf.nn.dynamic_rnn(
             lstm, x, initial_state=state_in, sequence_length=step_size,
             time_major=False)
