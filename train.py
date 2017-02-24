@@ -80,6 +80,8 @@ def create_commands(session, num_workers, remotes, env_id, logdir, shell='bash',
 
     if mode == 'tmux':
         cmds += [
+        "kill $( lsof -i:12345 -t ) > /dev/null 2>&1",  # kill any process using tensorboard's port
+        "kill $( lsof -i:12222-{} -t ) > /dev/null 2>&1".format(num_workers+12222), # kill any processes using ps / worker ports
         "tmux kill-session -t {}".format(session),
         "tmux new-session -s {} -n {} -d {}".format(session, windows[0], shell)
         ]
