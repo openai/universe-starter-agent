@@ -25,7 +25,7 @@ source activate universe-starter-agent
 
 brew install tmux htop cmake      # On Linux use sudo apt-get install -y tmux htop cmake
 
-pip install gym[atari] # for zsh users, wrap it in double quotes: pip install "gym[atari]"
+pip install "gym[atari]"
 pip install universe
 pip install six
 pip install tensorflow
