@@ -13,6 +13,7 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 * [htop](https://hisham.hm/htop/) (shown in one of the tmux windows)
 * [gym](https://pypi.python.org/pypi/gym)
 * gym[atari]
+* libjpeg-turbo (`brew install libjpeg-turbo`)
 * [universe](https://pypi.python.org/pypi/universe)
 * [opencv-python](https://pypi.python.org/pypi/opencv-python)
 * [numpy](https://pypi.python.org/pypi/numpy)
