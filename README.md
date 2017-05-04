@@ -25,7 +25,7 @@ It contains a basic implementation of the [A3C algorithm](https://arxiv.org/abs/
 conda create --name universe-starter-agent python=3.5
 source activate universe-starter-agent
 
-brew install tmux htop cmake      # On Linux use sudo apt-get install -y tmux htop cmake
+brew install tmux htop cmake golang libjpeg-turbo      # On Linux use sudo apt-get install -y tmux htop cmake golang libjpeg-dev
 
 pip install "gym[atari]"
 pip install universe
