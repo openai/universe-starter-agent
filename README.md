@@ -1,3 +1,5 @@
+**This repository has been deprecated in favor of the Retro (https://github.com/openai/retro) library. See our Retro Contest (https://blog.openai.com/retro-contest) blog post for detalis.**
+
 # universe-starter-agent
 
 The codebase implements a starter agent that can solve a number of `universe` environments.
